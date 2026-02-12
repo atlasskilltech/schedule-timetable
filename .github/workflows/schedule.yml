@@ -19,6 +19,7 @@ jobs:
           chmod 600 ~/.ssh/key.pem
           ssh -i ~/.ssh/key.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
             cd /home/ubuntu/schedule-timetable
+            git pull origin main
             npm install
             pm2 restart schedule-timetable || pm2 start server.js --name schedule-timetable
           EOF
