@@ -1,0 +1,374 @@
+
+     <%- include('partials/header', { active: 'dashboard' }) %>
+  
+  
+ 
+<div class="p-[32px]">
+     
+      <div class="flex flex-wrap items-end
+            gap-[4px]
+            py-[8px] px-[16px]
+            bg-[#ffffff]
+            border border-[#e2e8f0]
+            rounded-[12px]
+            mb-[16px]" >
+
+           
+          
+
+
+
+
+
+
+
+
+
+<!-- filterDate field here  -->
+
+ <div class="min-w-[100px] flex flex-col gap-[2px] shrink basis-auto grow-0" id="filterDate">
+           
+    
+    
+    
+   
+
+
+
+
+
+
+
+
+          </div>
+
+
+<!-- filterDate field here  -->
+
+
+
+
+
+
+
+
+
+
+
+       
+
+<!-- program field here  -->
+
+ <div class="min-w-[100px] flex flex-col gap-[2px] shrink basis-auto grow-0" id="filterProgram">
+           
+    
+    
+    
+   
+
+
+
+
+
+
+
+
+          </div>
+
+
+<!-- program field here  -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- my field is here year  -->
+
+
+
+ <div class="min-w-[100px] flex flex-col gap-[2px] shrink basis-auto grow-0" id="filterYear">
+           
+    
+    
+    
+   
+
+
+
+
+
+
+
+
+          </div>
+
+
+
+
+
+
+
+
+
+<!-- my field is here  -->
+
+
+
+
+
+
+
+
+
+
+<!-- Sections field here  -->
+
+ <div class="min-w-[100px] flex flex-col gap-[2px] shrink basis-auto grow-0" id="filterSection">
+           
+    
+    
+    
+   
+
+ </div>
+
+
+<!-- Sections field here  -->
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- faculty field here  -->
+
+ <div class="min-w-[100px] flex flex-col gap-[2px] shrink basis-auto grow-0" id="filterFaculty">
+           
+    
+    
+    
+   
+
+ </div>
+
+
+<!-- faculty field here  -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- Rooms field here  -->
+
+ <div class="min-w-[100px] flex flex-col gap-[2px] shrink basis-auto grow-0" id="filterRoom">
+           
+    
+    
+    
+   
+
+ </div>
+
+
+<!-- Rooms field here  -->
+
+
+
+
+   
+
+
+
+<!-- Subject field here  -->
+
+ <div class="min-w-[100px] flex flex-col gap-[2px] shrink basis-auto grow-0" id="filterSubject">
+           
+    
+    
+    
+   
+
+ </div>
+
+
+<!-- Subject field here  -->
+
+
+
+
+
+
+   
+
+
+
+<!-- All Day field here  -->
+
+ <div class="min-w-[100px] flex flex-col gap-[2px] shrink basis-auto grow-0" id="filterDay">
+           
+    
+    
+    
+   
+
+ </div>
+
+
+<!-- All Day field here  -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- All Time field here  -->
+
+ <div class="min-w-[100px] flex flex-col gap-[2px] shrink basis-auto grow-0" id="filterTime">
+           
+    
+    
+    
+   
+
+ </div>
+
+
+<!-- All Time field here  -->
+
+
+
+
+
+
+
+
+
+          
+          
+         
+          
+         
+         
+          
+         
+          
+         
+         
+          
+
+    
+        
+        <button class="bg-slate-100 text-slate-800 border border-slate-200 inline-flex items-center gap-2 px-4 py-2 rounded-lg
+text-[0.85rem] font-medium cursor-pointer
+transition-all duration-[150ms] ease-in-out h-fit whitespace-nowrap" id="clearFilters">Clear</button>
+
+
+
+
+
+
+
+      </div>
+
+      
+
+
+
+
+
+
+
+
+
+
+      <div class="flex bg-[#1e293b] rounded-[12px] px-[24px] py-[16px] mb-[24px] gap-[32px]">
+        
+          <div class="flex flex-col gap-[2px]">
+            <span class="text-[0.7rem] text-[#94a3b8] uppercase tracking-[0.05em]">TIMETABLE VERSION</span>
+            <span class="text-[1rem] font-[600] text-white">1</span>
+          </div>
+          <div class="flex flex-col gap-[2px]">
+            <span class="text-[0.7rem] text-[#94a3b8] uppercase tracking-[0.05em]">STATUS</span>
+            <span class="inline-block bg-[rgba(16,185,129,0.2)] text-[#34d399] px-[10px] py-[2px] rounded-[4px] text-[0.75rem] font-[600]">GENERATED</span>
+          </div>
+          <div class="flex flex-col gap-[2px]">
+            <span class="text-[0.7rem] text-[#94a3b8] uppercase tracking-[0.05em]">TOTAL EVENTS</span>
+            <span class="text-[1rem] font-[600] text-white" id="totalEvents">0</span>
+          </div>
+          <div class="flex flex-col gap-[2px]">
+            <span class="text-[0.7rem] text-[#94a3b8] uppercase tracking-[0.05em]">GENERATED ON</span>
+            <span class="text-[1rem] font-[600] text-white" id="generatedDate">-</span>
+          </div>
+        
+      </div>
+
+     
+      <div id="timetableContainer" class="bg-white border border-[#e2e8f0] rounded-[12px] overflow-hidden">
+       
+      </div>
+
+     
+      <div id="loadingState" class="loading-state" style="display: none;">
+        <div class="spinner"></div>
+        <p>Loading timetable data...</p>
+      </div>
+
+     
+      <div id="emptyState" class="empty-state" style="display: none;">
+        <div class="empty-icon">📅</div>
+        <h3>No classes found</h3>
+        <p>Try adjusting your filters to see more results</p>
+      </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/dashboard.js"></script>
+ 
+</body>
+</html>

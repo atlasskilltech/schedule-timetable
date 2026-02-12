@@ -1,0 +1,43 @@
+<%- include('partials/header', { active: 'by-faculty' }) %>
+  
+    
+    <div class="p-[32px]">
+
+      <div class="filters-container">
+        <div class="filter-grid" style="grid-template-columns: repeat(2, 1fr);">
+          <div class="filter-item">
+            <label>📅 DATE</label>
+            <input type="date" id="dateFilter" class="filter-input">
+          </div>
+          
+          <div class="filter-item">
+            <label>👨‍🏫 FACULTY</label>
+            <select id="facultyFilter" class="filter-select">
+              <option value="all">All Faculty</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div id="facultiesContainer" class="timetable-cards">
+        <!-- Faculty cards will be loaded here -->
+      </div>
+
+      <div id="loadingState" class="loading-state" style="display: none;">
+        <div class="spinner"></div>
+        <p>Loading faculty data...</p>
+      </div>
+
+      <div id="emptyState" class="empty-state" style="display: none;">
+        <div class="empty-icon">👨‍🏫</div>
+        <h3>No faculty schedules found</h3>
+        <p>Try adjusting your filters</p>
+      </div>
+</div>
+
+    </div>
+  </div>
+
+  <script src="/js/by-faculty.js"></script>
+</body>
+</html>

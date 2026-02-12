@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" class="text-sm scroll-smooth font-[var(--font-main)]">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ATLAS Timetable - <%=  active  %></title>
+
+
+  <link rel="stylesheet" href="/css/main.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+
+
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+   
+    :root {
+  --font-main: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+</style>
+</head>
+<body style="font-family: var(--font-main)" class="  bg-slate-50 text-[#1e293b] leading-relaxed min-h-screen">
+  <div class="flex min-h-screen">
+    <aside class="w-[260px] bg-[#1e293b] text-[#e2e8f0] flex flex-col fixed inset-y-0 left-0 z-[100]">
+  <div class="p-[24px] border-b border-white/10">
+    <div class="flex items-center gap-[8px]">
+      <div class="w-[36px] h-[36px] bg-[#10b981] rounded-[8px] flex items-center justify-center font-bold text-[1.1rem] text-white">A</div>
+      <span class="text-[1.1rem] font-semibold tracking-[-0.02em]">ATLAS Timetable</span>
+    </div>
+  </div>
+
+  <nav class="flex-1 py-4 px-0 overflow-y-auto">
+    <!-- Overview Section -->
+    <div class="mb-[24px]">
+      <h3 class="py-[8px] px-[24px] text-[0.7rem] uppercase tracking-[0.08em] text-[#94a3b8] font-[600]">OVERVIEW</h3>
+      <a href="/dashboard"  style="font-family: sans-serif;" class="flex items-center gap-[8px] py-[8px] px-[24px] text-[0.9rem] font-[500] cursor-pointer transition-all duration-[150ms] ease-in-out
+         border-none w-full text-left  leading-normal text-[#94a3b8] 
+ <%= active === 'dashboard' ? 'bg-[#10b981] text-white rounded-r-[8px] mr-[16px]' : 'hover:bg-[#334155] hover:text-[#e2e8f0]' %>">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[18px] h-[18px] shrink-0">
+                            <rect x="3" y="3" width="7" height="9" rx="1"/>
+                            <rect x="14" y="3" width="7" height="5" rx="1"/>
+                            <rect x="14" y="12" width="7" height="9" rx="1"/>
+                            <rect x="3" y="16" width="7" height="5" rx="1"/>
+                        </svg>
+        Dashboard
+      </a>
+    </div>
+
+    <!-- Timetable Views Section -->
+    <div class="mb-[24px]">
+      <h3 class="py-[8px] px-[24px] text-[0.7rem] uppercase tracking-[0.08em] text-[#94a3b8] font-[600]">TIMETABLE VIEWS</h3>
+
+
+      <a href="/timetable/by-division" style="font-family: sans-serif;" class="flex items-center gap-[8px] py-[8px] px-[24px] text-[0.9rem] font-[500] cursor-pointer transition-all duration-[150ms] ease-in-out
+         border-none w-full text-left  leading-normal   text-[#94a3b8] 
+  <%= active === 'by-division' ? 'bg-[#10b981] text-white rounded-r-[8px] mr-[16px]' : 'hover:bg-[#334155] hover:text-[#e2e8f0]' %>">
+         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[18px] h-[18px] shrink-0">
+                            <rect x="3" y="4" width="18" height="18" rx="2"/>
+                            <line x1="16" y1="2" x2="16" y2="6"/>
+                            <line x1="8" y1="2" x2="8" y2="6"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                        </svg>
+        <span>By Division</span>
+      </a>
+      <a href="/timetable/by-faculty"  style="font-family: sans-serif;" class="flex items-center gap-[8px] py-[8px] px-[24px] text-[0.9rem] font-[500] cursor-pointer transition-all duration-[150ms] ease-in-out
+         border-none w-full text-left  leading-normal text-[#94a3b8] 
+  <%= active === 'by-faculty' ? 'bg-[#10b981] text-white rounded-r-[8px] mr-[16px]' : 'hover:bg-[#334155] hover:text-[#e2e8f0]' %>">
+         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[18px] h-[18px] shrink-0">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+        <span>By Faculty</span>
+      </a>
+      <a href="/timetable/by-day" style="font-family: sans-serif;" class="flex items-center gap-[8px] py-[8px] px-[24px] text-[0.9rem] font-[500] cursor-pointer transition-all duration-[150ms] ease-in-out
+         border-none w-full text-left  leading-normal text-[#94a3b8]  <%= active === 'by-day' ? 'bg-[#10b981] text-white rounded-r-[8px] mr-[16px]' : 'hover:bg-[#334155] hover:text-[#e2e8f0]'  %>">
+       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"  class="w-[18px] h-[18px] shrink-0">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12,6 12,12 16,14"/>
+                        </svg>
+        <span>By Day</span>
+      </a>
+    </div>
+
+    <!-- Resources Section -->
+    <div class="mb-[24px]">
+      <h3 class="py-[8px] px-[24px] text-[0.7rem] uppercase tracking-[0.08em] text-[#94a3b8] font-[600]">RESOURCES</h3>
+      <a href="/resources/classrooms"  style="font-family: sans-serif;" class="flex items-center gap-[8px] py-[8px] px-[24px] text-[0.9rem] font-[500] cursor-pointer transition-all duration-[150ms] ease-in-out
+         border-none w-full text-left  leading-normal text-[#94a3b8] <%= active === 'classrooms' ? 'bg-[#10b981] text-white rounded-r-[8px] mr-[16px]' : 'hover:bg-[#334155] hover:text-[#e2e8f0]' %>">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[18px] h-[18px] shrink-0">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                            <polyline points="9,22 9,12 15,12 15,22"/>
+                        </svg>
+        <span>Classrooms</span>
+      </a>
+      <a href="/resources/unscheduled"  style="font-family: sans-serif;" class="flex items-center gap-[8px] py-[8px] px-[24px] text-[0.9rem] font-[500] cursor-pointer transition-all duration-[150ms] ease-in-out
+         border-none w-full text-left  leading-normal text-[#94a3b8] <%= active === 'unscheduled' ? 'bg-[#10b981] text-white rounded-r-[8px] mr-[16px]' : 'hover:bg-[#334155] hover:text-[#e2e8f0]' %>">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[18px] h-[18px] shrink-0">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+        <span>Unscheduled</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Home button at bottom -->
+  <div class="p-[16px] border-t border-white/10">
+    <a href="/" style="font-family: sans-serif;" class="flex items-center gap-[8px] py-[10px] px-[12px] text-[0.9rem] font-[500] cursor-pointer transition-all duration-[150ms] ease-in-out rounded-[8px] text-[#94a3b8] hover:bg-[#334155] hover:text-[#e2e8f0]">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[18px] h-[18px] shrink-0">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9,22 9,12 15,12 15,22"/>
+      </svg>
+      <span>Home</span>
+    </a>
+  </div>
+
+    </aside>
+
+    <div class="flex-1 ml-[260px] min-h-screen">
+      
+      <header class="bg-[#ffffff] border-b border-[#e2e8f0]
+            py-[16px] px-[32px]
+            flex justify-between items-center
+            sticky top-0 z-[50]">
+       
+          <div class="">
+            <h1 class="text-[1.5rem] font-[600] text-[#1e293b] mb-[2px]">Dashboard</h1>
+            <p class="text-[0.85rem] text-[#64748b]">Overview of timetable statistics and metrics</p>
+          </div>
+          <div class="flex items-center gap-[16px]">
+            <div class="flex gap-[24px] pr-[24px] border-r border-[#e2e8f0]">
+            <div class="text-center">
+              <div class="text-[1.25rem] font-[700] text-[#10b981]" id="totalScheduled">0</div>
+              <div class="text-[0.7rem] text-[#94a3b8] uppercase tracking-[0.05em]">SCHEDULED</div>
+            </div>
+            <div class="text-center">
+              <div class="text-[1.25rem] font-[700] text-[#10b981]" id="totalUnscheduled">0</div>
+              <div class="text-[0.7rem] text-[#94a3b8] uppercase tracking-[0.05em]">UNSCHEDULED</div>
+            </div>
+            </div>
+            <button style="font-family: var(--font-main)" class="bg-transparent text-[#64748b] border border-[#e2e8f0] inline-flex items-center gap-[8px]
+         py-[8px] px-[16px]
+         rounded-[8px]
+         text-[0.85rem] font-[500]
+         cursor-pointer
+         transition-all duration-[150ms] ease-in-out hover:bg-[#f1f5f9] hover:text-[#1e293b]">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"  class="w-[16px] h-[16px]">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>Feedback
+            </button>
+          </div>
+        
+      </header>

@@ -1,0 +1,64 @@
+<%- include('partials/header', { active: 'unscheduled' }) %>
+   
+    
+ <div class="p-[32px]">
+      <div class="filters-container">
+        <div class="filter-grid" style="grid-template-columns: 1fr;">
+          <div class="filter-item">
+            <label>📅 DATE</label>
+            <input type="date" id="dateFilter" class="filter-input">
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs-container">
+        <button class="tab-button active" data-tab="classes">
+          Classes (<span id="classesCount">0</span>)
+        </button>
+        <button class="tab-button" data-tab="faculties">
+          Faculties (<span id="facultiesCount">0</span>)
+        </button>
+        <button class="tab-button" data-tab="rooms">
+          Rooms (<span id="roomsCount">0</span>)
+        </button>
+      </div>
+
+      <!-- Tab Contents -->
+      <div class="tab-content active" id="classesTab">
+        <div id="classesContainer" class="unscheduled-list">
+          <!-- Classes will be loaded here -->
+        </div>
+      </div>
+
+      <div class="tab-content" id="facultiesTab">
+        <div id="facultiesContainer" class="unscheduled-list">
+          <!-- Faculties will be loaded here -->
+        </div>
+      </div>
+
+      <div class="tab-content" id="roomsTab">
+        <div id="roomsContainer" class="unscheduled-list">
+          <!-- Rooms will be loaded here -->
+        </div>
+      </div>
+
+      <div id="loadingState" class="loading-state" style="display: none;">
+        <div class="spinner"></div>
+        <p>Loading unscheduled items...</p>
+      </div>
+
+      <div id="emptyState" class="empty-state" style="display: none;">
+        <div class="empty-icon">✅</div>
+        <h3>Everything is scheduled!</h3>
+        <p>No unscheduled items found for this date</p>
+      </div>
+
+</div>
+      
+    </div>
+  </div>
+
+  <script src="/js/unscheduled.js"></script>
+</body>
+</html>

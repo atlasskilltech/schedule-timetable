@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en" class="text-sm scroll-smooth font-[var(--font-main)]">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ATLAS Tech</title>
+
+  <link rel="stylesheet" href="/css/main.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --font-main: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    .mobile-menu-btn { display: none; }
+    .sidebar-overlay { display: none; }
+
+    @media (max-width: 768px) {
+      .start-sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+      }
+      .start-sidebar.open {
+        transform: translateX(0);
+      }
+      .start-main {
+        margin-left: 0 !important;
+      }
+      .mobile-menu-btn {
+        display: flex;
+        position: fixed;
+        top: 16px;
+        left: 16px;
+        z-index: 200;
+        width: 40px;
+        height: 40px;
+        background: #1e293b;
+        border: none;
+        border-radius: 8px;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: white;
+      }
+      .sidebar-overlay.open {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.4);
+        z-index: 90;
+      }
+      .start-cards {
+        grid-template-columns: 1fr !important;
+        max-width: 100% !important;
+      }
+      .start-welcome-title {
+        font-size: 1.4rem !important;
+      }
+      .start-welcome-sub {
+        font-size: 0.85rem !important;
+      }
+      .start-logo-box {
+        width: 56px !important;
+        height: 56px !important;
+        font-size: 1.5rem !important;
+        border-radius: 12px !important;
+      }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .start-cards {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 12px !important;
+      }
+    }
+  </style>
+</head>
+<body style="font-family: var(--font-main)" class="bg-slate-50 text-[#1e293b] leading-relaxed min-h-screen">
+
+  <!-- Mobile hamburger -->
+  <button class="mobile-menu-btn" onclick="toggleStartSidebar()">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="3" y1="6" x2="21" y2="6"/>
+      <line x1="3" y1="12" x2="21" y2="12"/>
+      <line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  </button>
+
+  <!-- Mobile overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleStartSidebar()"></div>
+
+  <div class="flex min-h-screen">
+
+    <!-- Start Sidebar -->
+    <aside class="start-sidebar w-[260px] bg-[#1e293b] text-[#e2e8f0] flex flex-col fixed inset-y-0 left-0 z-[100]">
+      <div class="p-[24px] border-b border-white/10">
+        <div class="flex items-center gap-[8px]">
+          <div class="w-[36px] h-[36px] bg-[#10b981] rounded-[8px] flex items-center justify-center font-bold text-[1.1rem] text-white">A</div>
+          <span class="text-[1.1rem] font-semibold tracking-[-0.02em]">ATLAS Tech</span>
+        </div>
+      </div>
+
+      <nav class="flex-1 py-4 px-0 overflow-y-auto">
+        <div class="mb-[24px]">
+          <h3 class="py-[8px] px-[24px] text-[0.7rem] uppercase tracking-[0.08em] text-[#94a3b8] font-[600]">MAIN MENU</h3>
+
+          
+          <a href="/timetable/by-division" style="font-family: sans-serif;" class="flex items-center gap-[8px] py-[10px] px-[24px] text-[0.9rem] font-[500] cursor-pointer transition-all duration-[150ms] ease-in-out border-none w-full text-left leading-normal text-[#94a3b8] hover:bg-[#334155] hover:text-[#e2e8f0]">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[18px] h-[18px] shrink-0">
+              <rect x="3" y="4" width="18" height="18" rx="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            <span>Timetable</span>
+          </a>
+
+          <a href="/dashboard" style="font-family: sans-serif;" class="flex items-center gap-[8px] py-[10px] px-[24px] text-[0.9rem] font-[500] cursor-pointer transition-all duration-[150ms] ease-in-out border-none w-full text-left leading-normal text-[#94a3b8] hover:bg-[#334155] hover:text-[#e2e8f0]">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[18px] h-[18px] shrink-0">
+              <rect x="3" y="3" width="7" height="9" rx="1"/>
+              <rect x="14" y="3" width="7" height="5" rx="1"/>
+              <rect x="14" y="12" width="7" height="9" rx="1"/>
+              <rect x="3" y="16" width="7" height="5" rx="1"/>
+            </svg>
+            <span>Students</span>
+          </a>
+
+          <a href="https://infra.atlasskilltech.app/" style="font-family: sans-serif;" class="flex items-center gap-[8px] py-[10px] px-[24px] text-[0.9rem] font-[500] cursor-pointer transition-all duration-[150ms] ease-in-out border-none w-full text-left leading-normal text-[#94a3b8] hover:bg-[#334155] hover:text-[#e2e8f0]">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[18px] h-[18px] shrink-0">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9,22 9,12 15,12 15,22"/>
+            </svg>
+            <span>Rooms</span>
+          </a>
+        </div>
+      </nav>
+
+      <!-- Footer -->
+      <div class="p-[20px] border-t border-white/10">
+        <div class="flex items-center gap-[12px]">
+          <div class="w-[36px] h-[36px] bg-[#10b981] rounded-full flex items-center justify-center font-semibold text-[0.85rem] text-white">A</div>
+          <div class="flex-1">
+            <div class="text-[0.85rem] font-[600] text-white">Admin User</div>
+            <div class="text-[0.7rem] text-[#94a3b8]">Administrator</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="start-main flex-1 ml-[260px] min-h-screen flex items-center justify-center p-[24px]">
+      <div class="text-center w-full max-w-[540px]">
+        <div class="start-logo-box w-[72px] h-[72px] bg-[#10b981] rounded-[16px] flex items-center justify-center font-bold text-[2rem] text-white mx-auto mb-[24px]">A</div>
+        <h1 class="start-welcome-title text-[2rem] font-[700] text-[#1e293b] mb-[8px]">Welcome to ATLAS Tech</h1>
+        <p class="start-welcome-sub text-[1rem] text-[#64748b] mb-[40px]">Select a section from the sidebar to get started</p>
+
+        <div class="start-cards grid grid-cols-3 gap-[16px] max-w-[540px] mx-auto">
+          <a href="/timetable/by-division" class="bg-white border border-[#e2e8f0] rounded-[12px] p-[24px] text-center hover:shadow-lg hover:border-[#10b981] transition-all duration-200 no-underline group">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[28px] h-[28px] mx-auto mb-[12px] text-[#64748b] group-hover:text-[#10b981] transition-colors">
+              <rect x="3" y="3" width="7" height="9" rx="1"/>
+              <rect x="14" y="3" width="7" height="5" rx="1"/>
+              <rect x="14" y="12" width="7" height="9" rx="1"/>
+              <rect x="3" y="16" width="7" height="5" rx="1"/>
+            </svg>
+            <div class="text-[0.9rem] font-[600] text-[#1e293b]">Timetable</div>
+            <div class="text-[0.7rem] text-[#94a3b8] mt-[4px]">View schedules</div>
+          </a>
+
+          <a href="/dashboard" class="bg-white border border-[#e2e8f0] rounded-[12px] p-[24px] text-center hover:shadow-lg hover:border-[#10b981] transition-all duration-200 no-underline group">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[28px] h-[28px] mx-auto mb-[12px] text-[#64748b] group-hover:text-[#10b981] transition-colors">
+              <rect x="3" y="4" width="18" height="18" rx="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            <div class="text-[0.9rem] font-[600] text-[#1e293b]">Students</div>
+            <div class="text-[0.7rem] text-[#94a3b8] mt-[4px]">Overview & stats</div>
+          </a>
+
+          <a href="https://infra.atlasskilltech.app/" class="bg-white border border-[#e2e8f0] rounded-[12px] p-[24px] text-center hover:shadow-lg hover:border-[#10b981] transition-all duration-200 no-underline group">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[28px] h-[28px] mx-auto mb-[12px] text-[#64748b] group-hover:text-[#10b981] transition-colors">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9,22 9,12 15,12 15,22"/>
+            </svg>
+            <div class="text-[0.9rem] font-[600] text-[#1e293b]">Rooms</div>
+            <div class="text-[0.7rem] text-[#94a3b8] mt-[4px]">Classrooms & more</div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function toggleStartSidebar() {
+      document.querySelector('.start-sidebar').classList.toggle('open');
+      document.getElementById('sidebarOverlay').classList.toggle('open');
+    }
+  </script>
+</body>
+</html>

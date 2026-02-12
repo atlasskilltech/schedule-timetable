@@ -1,0 +1,50 @@
+<%- include('partials/header', { active: 'classrooms' }) %>
+  
+
+<div class="p-[32px]">
+      <div class="filters-container">
+        <div class="filter-grid" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="filter-item">
+            <label>📅 DATE</label>
+            <input type="date" id="dateFilter" class="filter-input">
+          </div>
+          
+          <div class="filter-item">
+            <label>🏢 BUILDING</label>
+            <select id="buildingFilter" class="filter-select">
+              <option value="all">All Buildings</option>
+            </select>
+          </div>
+          
+          <div class="filter-item">
+            <label>📍 FLOOR</label>
+            <select id="floorFilter" class="filter-select">
+              <option value="all">All Floors</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div id="classroomsContainer" class="timetable-cards">
+        <!-- Classroom cards will be loaded here -->
+      </div>
+
+      <div id="loadingState" class="loading-state" style="display: none;">
+        <div class="spinner"></div>
+        <p>Loading classroom data...</p>
+      </div>
+
+      <div id="emptyState" class="empty-state" style="display: none;">
+        <div class="empty-icon">🏢</div>
+        <h3>No classrooms found</h3>
+        <p>Try adjusting your filters</p>
+      </div>
+
+
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/classrooms.js"></script>
+</body>
+</html>

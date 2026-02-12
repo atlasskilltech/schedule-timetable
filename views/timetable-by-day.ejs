@@ -1,0 +1,39 @@
+<%- include('partials/header', { active: 'by-day' }) %>
+   
+    
+    <div class="p-[32px]">
+      <div class="filters-container">
+        <div class="filter-grid" style="grid-template-columns: repeat(2, 1fr);">
+          <div class="filter-item">
+            <label>📅 START DATE</label>
+            <input type="date" id="startDateFilter" class="filter-input">
+          </div>
+          
+          <div class="filter-item">
+            <label>📅 END DATE</label>
+            <input type="date" id="endDateFilter" class="filter-input">
+          </div>
+        </div>
+      </div>
+
+      <div id="daysContainer" class="timetable-cards">
+        <!-- Day cards will be loaded here -->
+      </div>
+
+      <div id="loadingState" class="loading-state" style="display: none;">
+        <div class="spinner"></div>
+        <p>Loading schedule data...</p>
+      </div>
+
+      <div id="emptyState" class="empty-state" style="display: none;">
+        <div class="empty-icon">📅</div>
+        <h3>No schedules found</h3>
+        <p>Try adjusting your date range</p>
+      </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/by-day.js"></script>
+</body>
+</html>
