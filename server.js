@@ -1,6 +1,10 @@
 const express = require('express');
 const path = require('path');
+const session = require('express-session');
 require('dotenv').config();
+
+const passport = require('./config/passport');
+const { ensureAuthenticated, injectUser } = require('./middleware/auth');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -16,14 +20,37 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
+// Session configuration
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'atlas-timetable-secret-key-change-in-production',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true
+  }
+}));
+
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Inject user data into all views
+app.use(injectUser);
+
+// --- Auth routes (public — no login required) ---
+const authRoutes = require('./routes/auth');
+app.use('/auth', authRoutes);
+
+// --- Protected routes (require Google login) ---
 const dashboardRoutes = require('./routes/dashboard');
 const timetableRoutes = require('./routes/timetable');
 const resourceRoutes = require('./routes/resources');
 
-app.use('/', dashboardRoutes);
-app.use('/timetable', timetableRoutes);
-app.use('/resources', resourceRoutes);
+app.use('/', ensureAuthenticated, dashboardRoutes);
+app.use('/timetable', ensureAuthenticated, timetableRoutes);
+app.use('/resources', ensureAuthenticated, resourceRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

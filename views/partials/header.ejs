@@ -108,8 +108,8 @@
     </div>
   </nav>
 
-  <!-- Home button at bottom -->
-  <div class="p-[16px] border-t border-white/10">
+  <!-- Home button -->
+  <div class="px-[16px] pt-[8px]">
     <a href="/" style="font-family: sans-serif;" class="flex items-center gap-[8px] py-[10px] px-[12px] text-[0.9rem] font-[500] cursor-pointer transition-all duration-[150ms] ease-in-out rounded-[8px] text-[#94a3b8] hover:bg-[#334155] hover:text-[#e2e8f0]">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[18px] h-[18px] shrink-0">
         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
@@ -117,6 +117,36 @@
       </svg>
       <span>Home</span>
     </a>
+  </div>
+
+  <!-- User Profile + Logout -->
+  <div class="p-[16px] border-t border-white/10">
+    <div class="flex items-center gap-[12px]">
+      <% if (user && user.photo) { %>
+        <img src="<%= user.photo %>" alt="<%= user.displayName %>" 
+             class="w-[36px] h-[36px] rounded-full object-cover border-2 border-[#10b981]"
+             referrerpolicy="no-referrer" />
+      <% } else { %>
+        <div class="w-[36px] h-[36px] bg-[#10b981] rounded-full flex items-center justify-center font-semibold text-[0.85rem] text-white">
+          <%= user ? user.displayName.charAt(0).toUpperCase() : 'A' %>
+        </div>
+      <% } %>
+      <div class="flex-1 min-w-0">
+        <div class="text-[0.85rem] font-[600] text-white truncate">
+          <%= user ? user.displayName : 'Guest' %>
+        </div>
+        <div class="text-[0.7rem] text-[#94a3b8] truncate">
+          <%= user ? user.email : '' %>
+        </div>
+      </div>
+      <a href="/auth/logout" title="Sign out" class="flex items-center justify-center w-[32px] h-[32px] rounded-[8px] text-[#94a3b8] hover:bg-[#334155] hover:text-red-400 transition-all duration-[150ms]">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[16px] h-[16px]">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+      </a>
+    </div>
   </div>
 
     </aside>
