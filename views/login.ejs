@@ -408,6 +408,24 @@
         Continue with Google
       </a>
 
+      <script>
+        // Show error if redirected with access_denied
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('error') === 'access_denied') {
+          const errorDiv = document.createElement('div');
+          errorDiv.style.cssText = 'background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:flex-start;gap:12px;';
+          errorDiv.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" style="width:20px;height:20px;flex-shrink:0;margin-top:1px;">
+              <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+            <p style="font-size:0.85rem;color:#991b1b;line-height:1.5;margin:0;">
+              <strong>Access Denied.</strong> Your email domain is not authorized. Only <strong>@isdi.in</strong> and <strong>@atlasuniversity.edu.in</strong> accounts can sign in.
+            </p>
+          `;
+          document.querySelector('.google-btn').insertAdjacentElement('beforebegin', errorDiv);
+        }
+      </script>
+
       <div class="divider">
         <span>Secure login</span>
       </div>

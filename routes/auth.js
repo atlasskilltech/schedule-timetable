@@ -21,13 +21,18 @@ router.get('/google',
 // Google OAuth - callback
 router.get('/google/callback',
   passport.authenticate('google', {
-    failureRedirect: '/auth/login'
+    failureRedirect: '/auth/login?error=access_denied'
   }),
   (req, res) => {
     // Successful authentication
     res.redirect('/');
   }
 );
+
+// Access denied page
+router.get('/denied', (req, res) => {
+  res.render('denied');
+});
 
 // Logout
 router.get('/logout', (req, res, next) => {
