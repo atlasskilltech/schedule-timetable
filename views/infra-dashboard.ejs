@@ -44,15 +44,15 @@
   </div>
 </aside>
 
-<div class="p-[32px]">
+<div class="p-[24px]">
   <!-- Header with stats -->
-  <div class="flex justify-between items-center mb-[24px]">
+  <div class="flex flex-wrap justify-between items-center gap-[12px] mb-[24px]">
     <div>
       <h2 class="text-[1.5rem] font-[700] text-[#1e293b] mb-[2px]">Room Occupancy</h2>
       <p class="text-[0.85rem] text-[#64748b]">Gantt chart view of room schedules</p>
     </div>
-    <div class="flex items-center gap-[16px]">
-      <div class="flex gap-[24px] pr-[24px] border-r border-[#e2e8f0]">
+    <div class="flex items-center gap-[12px] flex-shrink-0">
+      <div class="flex gap-[16px] pr-[16px] border-r border-[#e2e8f0]">
         <div class="text-center">
           <div class="text-[1.25rem] font-[700] text-[#ef4444]" id="headerOccupied">0</div>
           <div class="text-[0.7rem] text-[#94a3b8] uppercase tracking-[0.05em]">Occupied</div>
@@ -62,7 +62,7 @@
           <div class="text-[0.7rem] text-[#94a3b8] uppercase tracking-[0.05em]">Available</div>
         </div>
       </div>
-      <button id="sidebarToggle" class="btn btn-secondary" style="font-family: var(--font-main); text-decoration: none;">
+      <button id="sidebarToggle" class="btn btn-secondary" style="font-family: var(--font-main); text-decoration: none; white-space: nowrap;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
           <line x1="4" y1="21" x2="4" y2="14"></line>
           <line x1="4" y1="10" x2="4" y2="3"></line>
@@ -73,7 +73,7 @@
         </svg>
         Schools
       </button>
-      <a href="#" id="refreshBtn" class="btn btn-secondary" style="font-family: var(--font-main);">
+      <a href="#" id="refreshBtn" class="btn btn-secondary" style="font-family: var(--font-main); white-space: nowrap;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
           <polyline points="23 4 23 10 17 10"></polyline>
           <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
@@ -105,7 +105,7 @@
 
   <!-- Filters -->
   <div class="filters-container">
-    <div class="filter-grid" style="grid-template-columns: repeat(5, 1fr);">
+    <div class="filter-grid infra-filter-grid">
       <div class="filter-item">
         <label>DATE</label>
         <input type="date" id="dateFilter" class="filter-input">
