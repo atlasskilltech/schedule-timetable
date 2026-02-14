@@ -260,7 +260,7 @@ function renderGanttChart() {
 
   let html = `
     <div class="gantt-header">
-      <div class="gantt-room-header">Room Details</div>
+      <div class="gantt-room-header">Room</div>
       <div class="gantt-timeline-header">
         ${hours.map(h => `<div class="gantt-hour">${h}:00</div>`).join('')}
       </div>
@@ -268,11 +268,12 @@ function renderGanttChart() {
   `;
 
   filteredRooms.forEach(room => {
+    const capacityText = room.room_capacity ? `Cap: ${room.room_capacity}` : '';
     html += `
       <div class="gantt-row">
         <div class="gantt-room-info">
           <div class="gantt-room-name">${room.room_name}</div>
-          <div class="gantt-room-detail">Room Capacity : ${room.room_capacity}</div>
+          <div class="gantt-room-detail">${capacityText}</div>
         </div>
         <div class="gantt-timeline">
           <div class="gantt-grid">
@@ -297,15 +298,15 @@ function renderSchedules(schedules, startHour, endHour) {
     const width = calculateWidth(schedule.start, schedule.end, startHour, endHour);
     const faculty = `${schedule.faculty_first_name || ''} ${schedule.faculty_last_name || ''}`.trim() || 'N/A';
     const gradient = getSchoolGradient(schedule.school_id);
+    const subjectDisplay = schedule.subject_code || schedule.subject_name;
 
     return `
       <div class="gantt-schedule"
            style="left:${left}%;width:${width}%;background:${gradient};"
-           title="${schedule.subject_name} — ${schedule.class}\n${faculty}\n${schedule.start} – ${schedule.end}">
-        <div class="schedule-time">${schedule.start} – ${schedule.end}</div>
-        <div class="schedule-title">${schedule.subject_name}</div>
+           title="${schedule.subject_name}\n${schedule.class} · ${faculty}\n${schedule.start} – ${schedule.end}">
+        <div class="schedule-title">${subjectDisplay}</div>
         <div class="schedule-info">${schedule.class}</div>
-        <div class="schedule-info">${faculty}</div>
+        <div class="schedule-time">${schedule.start} – ${schedule.end}</div>
       </div>
     `;
   }).join('');
