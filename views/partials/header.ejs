@@ -32,11 +32,11 @@
   </div>
 
   <nav class="flex-1 py-4 px-0 overflow-y-auto">
-    <!-- Overview Section -->
+    <!-- Timetable Section -->
     <div class="mb-[24px]">
-      <h3 class="py-[8px] px-[24px] text-[0.7rem] uppercase tracking-[0.08em] text-[#94a3b8] font-[600]">OVERVIEW</h3>
+      <h3 class="py-[8px] px-[24px] text-[0.7rem] uppercase tracking-[0.08em] text-[#94a3b8] font-[600]">TIMETABLE</h3>
       <a href="/dashboard"  style="font-family: sans-serif;" class="flex items-center gap-[8px] py-[8px] px-[24px] text-[0.9rem] font-[500] cursor-pointer transition-all duration-[150ms] ease-in-out
-         border-none w-full text-left  leading-normal text-[#94a3b8] 
+         border-none w-full text-left  leading-normal text-[#94a3b8]
  <%= active === 'dashboard' ? 'bg-[#10b981] text-white rounded-r-[8px] mr-[16px]' : 'hover:bg-[#334155] hover:text-[#e2e8f0]' %>">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[18px] h-[18px] shrink-0">
                             <rect x="3" y="3" width="7" height="9" rx="1"/>
@@ -46,15 +46,9 @@
                         </svg>
         Dashboard
       </a>
-    </div>
-
-    <!-- Timetable Views Section -->
-    <div class="mb-[24px]">
-      <h3 class="py-[8px] px-[24px] text-[0.7rem] uppercase tracking-[0.08em] text-[#94a3b8] font-[600]">TIMETABLE VIEWS</h3>
-
 
       <a href="/timetable/by-division" style="font-family: sans-serif;" class="flex items-center gap-[8px] py-[8px] px-[24px] text-[0.9rem] font-[500] cursor-pointer transition-all duration-[150ms] ease-in-out
-         border-none w-full text-left  leading-normal   text-[#94a3b8] 
+         border-none w-full text-left  leading-normal   text-[#94a3b8]
   <%= active === 'by-division' ? 'bg-[#10b981] text-white rounded-r-[8px] mr-[16px]' : 'hover:bg-[#334155] hover:text-[#e2e8f0]' %>">
          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[18px] h-[18px] shrink-0">
                             <rect x="3" y="4" width="18" height="18" rx="2"/>
@@ -138,6 +132,11 @@
                         </svg>
         <span>Unscheduled</span>
       </a>
+    </div>
+
+    <!-- Infrastructure Section -->
+    <div class="mb-[24px]">
+      <h3 class="py-[8px] px-[24px] text-[0.7rem] uppercase tracking-[0.08em] text-[#94a3b8] font-[600]">INFRASTRUCTURE</h3>
       <a href="/infra/rooms"  style="font-family: sans-serif;" class="flex items-center gap-[8px] py-[8px] px-[24px] text-[0.9rem] font-[500] cursor-pointer transition-all duration-[150ms] ease-in-out
          border-none w-full text-left  leading-normal text-[#94a3b8] <%= active === 'infra-rooms' ? 'bg-[#10b981] text-white rounded-r-[8px] mr-[16px]' : 'hover:bg-[#334155] hover:text-[#e2e8f0]' %>">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[18px] h-[18px] shrink-0">
