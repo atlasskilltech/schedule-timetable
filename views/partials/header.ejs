@@ -32,6 +32,14 @@
   </div>
 
   <nav class="flex-1 py-4 px-0 overflow-y-auto">
+    <%
+      const timetablePages = ['dashboard', 'by-division', 'by-faculty', 'by-day'];
+      const studentPages = ['student-dashboard', 'student-search', 'student-divisions'];
+      const resourcePages = ['classrooms', 'unscheduled'];
+      const infraPages = ['infra-rooms'];
+    %>
+
+    <% if (timetablePages.includes(active)) { %>
     <!-- Timetable Section -->
     <div class="mb-[24px]">
       <h3 class="py-[8px] px-[24px] text-[0.7rem] uppercase tracking-[0.08em] text-[#94a3b8] font-[600]">TIMETABLE</h3>
@@ -59,7 +67,7 @@
         <span>By Division</span>
       </a>
       <a href="/timetable/by-faculty"  style="font-family: sans-serif;" class="flex items-center gap-[8px] py-[8px] px-[24px] text-[0.9rem] font-[500] cursor-pointer transition-all duration-[150ms] ease-in-out
-         border-none w-full text-left  leading-normal text-[#94a3b8] 
+         border-none w-full text-left  leading-normal text-[#94a3b8]
   <%= active === 'by-faculty' ? 'bg-[#10b981] text-white rounded-r-[8px] mr-[16px]' : 'hover:bg-[#334155] hover:text-[#e2e8f0]' %>">
          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[18px] h-[18px] shrink-0">
                             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
@@ -77,8 +85,27 @@
                         </svg>
         <span>By Day</span>
       </a>
+      <a href="/resources/classrooms"  style="font-family: sans-serif;" class="flex items-center gap-[8px] py-[8px] px-[24px] text-[0.9rem] font-[500] cursor-pointer transition-all duration-[150ms] ease-in-out
+         border-none w-full text-left  leading-normal text-[#94a3b8] <%= active === 'classrooms' ? 'bg-[#10b981] text-white rounded-r-[8px] mr-[16px]' : 'hover:bg-[#334155] hover:text-[#e2e8f0]' %>">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[18px] h-[18px] shrink-0">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                            <polyline points="9,22 9,12 15,12 15,22"/>
+                        </svg>
+        <span>Classrooms</span>
+      </a>
+      <a href="/resources/unscheduled"  style="font-family: sans-serif;" class="flex items-center gap-[8px] py-[8px] px-[24px] text-[0.9rem] font-[500] cursor-pointer transition-all duration-[150ms] ease-in-out
+         border-none w-full text-left  leading-normal text-[#94a3b8] <%= active === 'unscheduled' ? 'bg-[#10b981] text-white rounded-r-[8px] mr-[16px]' : 'hover:bg-[#334155] hover:text-[#e2e8f0]' %>">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[18px] h-[18px] shrink-0">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+        <span>Unscheduled</span>
+      </a>
     </div>
+    <% } %>
 
+    <% if (studentPages.includes(active)) { %>
     <!-- Student Count Section -->
     <div class="mb-[24px]">
       <h3 class="py-[8px] px-[24px] text-[0.7rem] uppercase tracking-[0.08em] text-[#94a3b8] font-[600]">STUDENT COUNT</h3>
@@ -111,7 +138,9 @@
         <span>By Division</span>
       </a>
     </div>
+    <% } %>
 
+    <% if (resourcePages.includes(active)) { %>
     <!-- Resources Section -->
     <div class="mb-[24px]">
       <h3 class="py-[8px] px-[24px] text-[0.7rem] uppercase tracking-[0.08em] text-[#94a3b8] font-[600]">RESOURCES</h3>
@@ -133,7 +162,9 @@
         <span>Unscheduled</span>
       </a>
     </div>
+    <% } %>
 
+    <% if (infraPages.includes(active)) { %>
     <!-- Infrastructure Section -->
     <div class="mb-[24px]">
       <h3 class="py-[8px] px-[24px] text-[0.7rem] uppercase tracking-[0.08em] text-[#94a3b8] font-[600]">INFRASTRUCTURE</h3>
@@ -147,6 +178,7 @@
         <span>Infra Dashboard</span>
       </a>
     </div>
+    <% } %>
   </nav>
 
   <!-- Home button -->
