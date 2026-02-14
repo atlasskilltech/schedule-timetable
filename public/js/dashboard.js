@@ -1,8 +1,8 @@
 // Global state
 let filters = {
   date: new Date().toISOString().split("T")[0],
-  program: [],
-  year: [],
+  program: "all",
+  year: "all",
   section: "all",
   faculty: "all",
   room: "all",
@@ -13,25 +13,246 @@ let filters = {
 
 // Initialize on page load
 document.addEventListener("DOMContentLoaded", () => {
-
   loadFilterOptions();
   loadData();
   attachEventListeners();
 });
 
+// ─── Multi-select dropdown toggle ───────────────────────────
+function toggleMultiSelect(displayEl) {
+  const container = displayEl.parentElement;
+  const wasOpen = container.classList.contains('open');
+  document.querySelectorAll('.multi-select.open').forEach(ms => ms.classList.remove('open'));
+  if (!wasOpen) container.classList.add('open');
+}
 
+// Close dropdowns when clicking outside
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.multi-select')) {
+    document.querySelectorAll('.multi-select.open').forEach(ms => ms.classList.remove('open'));
+  }
+});
 
-// Load filter options from API
+// ─── Dropdown builder helper ────────────────────────────────
+function buildSelectDropdownHTML(label, placeholder, items, idPrefix) {
+  let html = `
+    <label class="flex items-center gap-[4px]
+      text-[0.7rem] font-[600]
+      text-[#94a3b8]
+      uppercase tracking-[0.05em]">
+      ${label}
+    </label>
+    <div class="relative min-w-[120px] multi-select group">
+      <div class="flex items-center justify-between
+        py-[6px] px-[10px]
+        bg-[#ffffff]
+        border border-[#e2e8f0]
+        rounded-[8px]
+        cursor-pointer
+        text-[0.85rem]
+        min-h-[32px]
+        gap-[4px]
+        transition-all duration-[150ms] ease-in-out text-[#64748b] hover:border-[#10b981] group-[.open]:border-[#10b981] group-[.open]:ring-2 group-[.open]:ring-[rgba(16,185,129,0.1)]"
+        onclick="toggleMultiSelect(this)">
+        <span class="text-[#64748b] whitespace-nowrap overflow-hidden text-ellipsis" id="${idPrefix}HeaderText">
+          ${placeholder}
+        </span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          class="w-[14px] h-[14px] shrink-0 transition-transform duration-[150ms]
+          ease-in-out text-[#94a3b8] group-[.open]:rotate-180">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </div>
+      <div class="absolute
+        top-[calc(100%+4px)]
+        left-0 right-0
+        bg-[#ffffff]
+        border border-[#e2e8f0]
+        rounded-[8px]
+        shadow-[0_10px_15px_-3px_rgb(0_0_0_/_0.1),_0_4px_6px_-4px_rgb(0_0_0_/_0.1)]
+        z-[1]
+        max-h-[250px]
+        overflow-y-auto
+        hidden group-[.open]:block">
+  `;
+
+  html += `
+    <div class="dropdown-option selected py-[8px] px-[12px]
+                cursor-pointer
+                text-[0.7rem] font-[600] text-[#1e293b] uppercase tracking-[0.05em]
+                hover:bg-[#f1f5f9]
+                transition-colors duration-[150ms] ease-in-out"
+         data-value="all">
+      ${placeholder}
+    </div>
+  `;
+
+  items.forEach(item => {
+    html += `
+      <div class="dropdown-option py-[8px] px-[12px]
+                  cursor-pointer
+                  text-[0.7rem] font-[600] text-[#94a3b8] uppercase tracking-[0.05em]
+                  hover:bg-[#f1f5f9]
+                  transition-colors duration-[150ms] ease-in-out"
+           data-value="${item.value}">
+        ${item.label}
+      </div>
+    `;
+  });
+
+  html += `
+      </div>
+    </div>
+  `;
+
+  return html;
+}
+
+function attachDropdownClick(container, filterKey, placeholder) {
+  container.addEventListener('click', (e) => {
+    const option = e.target.closest('.dropdown-option');
+    if (!option) return;
+    const value = option.dataset.value;
+
+    container.querySelectorAll('.dropdown-option').forEach(o => {
+      o.classList.remove('selected', 'text-[#1e293b]');
+      o.classList.add('text-[#94a3b8]');
+    });
+    option.classList.add('selected');
+    option.classList.remove('text-[#94a3b8]');
+    option.classList.add('text-[#1e293b]');
+
+    filters[filterKey] = value;
+    document.getElementById(`${filterKey}HeaderText`).textContent =
+      value === 'all' ? placeholder : option.textContent.trim();
+
+    container.querySelector('.multi-select')?.classList.remove('open');
+    loadData();
+  });
+}
+
+// ─── Date Picker ────────────────────────────────────────────
+function initDatePicker() {
+  const container = document.getElementById('filterDate');
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const format = d => d.toISOString().split('T')[0];
+  const todayStr = format(today);
+  filters.date = todayStr;
+
+  let html = `
+    <label class="flex items-center gap-[4px]
+      text-[0.7rem] font-[600]
+      text-[#94a3b8]
+      uppercase tracking-[0.05em]">
+      DATE
+    </label>
+    <div class="relative min-w-[120px] multi-select group">
+      <div class="flex items-center justify-between
+        py-[6px] px-[10px]
+        bg-[#ffffff]
+        border border-[#e2e8f0]
+        rounded-[8px]
+        cursor-pointer
+        text-[0.85rem]
+        min-h-[32px]
+        gap-[4px]
+        transition-all duration-[150ms] ease-in-out text-[#64748b] hover:border-[#10b981] group-[.open]:border-[#10b981] group-[.open]:ring-2 group-[.open]:ring-[rgba(16,185,129,0.1)]"
+        onclick="toggleMultiSelect(this)">
+        <span class="text-[#64748b] whitespace-nowrap overflow-hidden text-ellipsis" id="dateHeaderText">
+          ${todayStr}
+        </span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          class="w-[14px] h-[14px] shrink-0 transition-transform duration-[150ms]
+          ease-in-out text-[#94a3b8] group-[.open]:rotate-180">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </div>
+      <div class="absolute
+        top-[calc(100%+4px)]
+        left-0
+        min-w-[160px]
+        bg-[#ffffff]
+        border border-[#e2e8f0]
+        rounded-[8px]
+        shadow-[0_10px_15px_-3px_rgb(0_0_0_/_0.1),_0_4px_6px_-4px_rgb(0_0_0_/_0.1)]
+        z-[1]
+        max-h-[250px]
+        overflow-y-auto
+        hidden group-[.open]:block">
+  `;
+
+  for (let month = 0; month < 12; month++) {
+    const monthName = new Date(currentYear, month, 1).toLocaleString('en-US', { month: 'long' });
+    html += `
+      <div class="px-[12px] py-[6px] text-[0.65rem] font-[700] text-[#64748b] bg-[#f8fafc] uppercase tracking-[0.05em] sticky top-0">
+        ${monthName} ${currentYear}
+      </div>
+    `;
+    const daysInMonth = new Date(currentYear, month + 1, 0).getDate();
+    for (let day = 1; day <= daysInMonth; day++) {
+      const d = new Date(currentYear, month, day);
+      const value = format(d);
+      const isToday = value === todayStr;
+      html += `
+        <div class="dropdown-option py-[6px] px-[12px]
+                    cursor-pointer
+                    text-[0.7rem] font-[600] ${isToday ? 'text-[#1e293b] selected' : 'text-[#94a3b8]'} uppercase tracking-[0.05em]
+                    hover:bg-[#f1f5f9]
+                    transition-colors duration-[150ms] ease-in-out"
+             data-value="${value}">
+          ${value}
+        </div>
+      `;
+    }
+  }
+
+  html += `
+      </div>
+    </div>
+  `;
+
+  container.innerHTML = html;
+
+  container.addEventListener('click', (e) => {
+    const option = e.target.closest('.dropdown-option');
+    if (!option) return;
+    const value = option.dataset.value;
+
+    container.querySelectorAll('.dropdown-option').forEach(o => {
+      o.classList.remove('selected', 'text-[#1e293b]');
+      o.classList.add('text-[#94a3b8]');
+    });
+    option.classList.add('selected');
+    option.classList.remove('text-[#94a3b8]');
+    option.classList.add('text-[#1e293b]');
+
+    filters.date = value;
+    document.getElementById('dateHeaderText').textContent = value;
+    container.querySelector('.multi-select')?.classList.remove('open');
+    loadData();
+  });
+
+  const trigger = container.querySelector('[onclick]');
+  if (trigger) {
+    trigger.setAttribute('onclick', '');
+    trigger.addEventListener('click', function handler() {
+      toggleMultiSelect(this);
+      const selected = container.querySelector('.dropdown-option.selected');
+      if (selected) selected.scrollIntoView({ block: 'center' });
+    });
+  }
+}
+
+// ─── Load filter options from API ───────────────────────────
 async function loadFilterOptions() {
   try {
     const response = await fetch("/api/dashboard/filters");
     const data = await response.json();
-    console.log("/api/dashboard/filters console",data);
 
     if (data.success) {
-        populateDateFilter();
+      initDatePicker();
       populatePrograms(data.data.programs);
-    
       populateYears(data.data.years);
       populateSections(data.data.sections);
       populateFaculties(data.data.faculties);
@@ -45,963 +266,60 @@ async function loadFilterOptions() {
   }
 }
 
-
-function populateDateFilter() {
-  const dateFilter = document.getElementById("filterDate");
-
-  const today = new Date();
-  const currentYear = today.getFullYear();
-
-  const format = d => d.toISOString().split("T")[0];
-  const todayStr = format(today);
-
-  // Default = today
-  filters.date = todayStr;
-
-  let html = `
-    <label class="flex items-center gap-[4px]
-      text-[0.7rem] font-[600]
-      text-[#94a3b8]
-      uppercase tracking-[0.05em]">
-      DATE
-    </label>
-
-    <div class="relative min-w-[120px] multi-select group">
-      <div class="flex items-center justify-between
-        py-[6px] px-[10px]
-        bg-[#ffffff]
-        border border-[#e2e8f0]
-        rounded-[8px]
-        cursor-pointer
-        text-[0.85rem]
-        min-h-[32px]
-        gap-[4px]
-        transition-all duration-[150ms] ease-in-out text-[#64748b] hover:border-[#10b981] group-[.open]:border-[#10b981] group-[.open]:ring-2 group-[.open]:ring-[rgba(16,185,129,0.1)]"
-        onclick="toggleMultiSelect(this)">
-
-        <span id="dateHeaderText">${todayStr}</span>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          class="w-[14px] h-[14px] shrink-0 text-[#94a3b8]">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </div>
-
-      <div class="absolute 
-        top-[calc(100%+4px)]
-        left-0 right-0
-        bg-[#ffffff]
-        border border-[#e2e8f0]
-        rounded-[8px]
-        shadow-[0_10px_15px_-3px_rgb(0_0_0_/_0.1),_0_4px_6px_-4px_rgb(0_0_0_/_0.1)]
-        z-[1]
-        max-h-[250px]
-        overflow-y-auto
-        hidden group-[.open]:block">
-  `;
-
-  // 🔥 Loop through 12 months
-  for (let month = 0; month < 12; month++) {
-    const monthName = new Date(currentYear, month, 1).toLocaleString("en-US", {
-      month: "long",
-    });
-
-    // Month header
-    html += `
-      <div class="px-[12px] py-[6px] text-[0.7rem]
-                  font-bold text-slate-500 bg-slate-100">
-        ${monthName} ${currentYear}
-      </div>
-    `;
-
-    // Days in month
-    const daysInMonth = new Date(currentYear, month + 1, 0).getDate();
-
-    for (let day = 1; day <= daysInMonth; day++) {
-      const d = new Date(currentYear, month, day);
-      const value = format(d);
-
-      html += `
-        <div class="flex items-center gap-[8px] py-[6px] px-[12px]
-                    cursor-pointer text-[0.85rem]">
-          <input
-            type="radio"
-            name="dateRadio"
-            value="${value}"
-            class="dateRadio accent-[#10b981]"
-            ${value === todayStr ? "checked" : ""} />
-
-          <label class="text-[0.7rem] font-[600] text-[#94a3b8] uppercase">
-            ${value}
-          </label>
-        </div>
-      `;
-    }
-  }
-
-  html += `
-      </div>
-    </div>
-  `;
-
-  dateFilter.innerHTML = html;
-
-  // 🔥 Handle change
-  dateFilter.addEventListener("change", (e) => {
-    if (!e.target.classList.contains("dateRadio")) return;
-
-    filters.date = e.target.value;
-    document.getElementById("dateHeaderText").textContent = e.target.value;
-
-    console.log("filters.date:", filters.date);
-
-    loadData();
-  });
-  
-}
-
-
 function populatePrograms(programs) {
-  console.log("populatePrograms",programs);
-    const programFilter = document.getElementById("filterProgram");
-   let html = `
-    <label class="flex items-center gap-[4px]
-      text-[0.7rem] font-[600]
-      text-[#94a3b8]
-      uppercase tracking-[0.05em]">
-      PROGRAM
-    </label>
-
-    <div class="relative min-w-[120px] multi-select group">
-      <div class="flex items-center justify-between
-        py-[6px] px-[10px]
-        bg-[#ffffff]
-        border border-[#e2e8f0]
-        rounded-[8px]
-        cursor-pointer
-        text-[0.85rem]
-        min-h-[32px]
-        gap-[4px]
-        transition-all duration-[150ms] ease-in-out text-[#64748b] hover:border-[#10b981] group-[.open]:border-[#10b981] group-[.open]:ring-2 group-[.open]:ring-[rgba(16,185,129,0.1)]"
-        id="toggleMultiSelect"
-        data-text="All Years"
-        onclick="toggleMultiSelect(this)">
-
-        <span class="text-[#64748b] whitespace-nowrap overflow-hidden text-ellipsis">
-          All Programs
-        </span>
-
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          class="w-[14px] h-[14px] shrink-0 transition-transform duration-[150ms]
-          ease-in-out text-[#94a3b8] group-[.open]:rotate-180">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </div>
-
-      <div class="absolute 
-        top-[calc(100%+4px)]
-        left-0 right-0
-        bg-[#ffffff]
-        border border-[#e2e8f0]
-        rounded-[8px]
-        shadow-[0_10px_15px_-3px_rgb(0_0_0_/_0.1),_0_4px_6px_-4px_rgb(0_0_0_/_0.1)]
-        z-[1]
-        max-h-[250px]
-        overflow-y-auto
-        hidden group-[.open]:block">
-  `;
-
-  // 2️⃣ Dynamic years loop
-  programs.forEach(program => {
-    html += `
-      <div class="flex items-center gap-[8px] py-[8px] px-[12px]
-                  cursor-pointer text-[0.85rem]
-                  transition-colors duration-[150ms] ease-in-out"
-           data-value="${program.school_code}">
-
-        <input
-          type="checkbox"
-          id="dashProgram_${program.school_code}"
-          value="${program.school_code}"
-          class="programBox w-[16px] h-[16px] accent-[#10b981] cursor-pointer " >
-
-        <label
-          for="dashProgram_${program.school_code}"
-          class="flex flex-1 items-center
-                 cursor-pointer
-                 whitespace-nowrap overflow-hidden text-ellipsis
-                 gap-[var(--space-xs)]
-                 text-[0.7rem] font-[600]
-                 text-[#94a3b8]
-                 uppercase tracking-[0.05em]">
-          ${program.school_name}ddd
-        </label>
-      </div>
-    `;
-  });
-
-  // 3️⃣ Close dropdown container
-  html += `
-      </div>
-    </div>
-  `;
-
-  programFilter.innerHTML = html;
-
-  programFilter.addEventListener("change", (e) => {
-  if (!e.target.classList.contains("programBox")) return;
-
-  // Saare checked years nikalo
-  const selectedPrograms = Array.from(
-    programFilter.querySelectorAll(".programBox:checked")
-  ).map(cb => cb.value);
-
-  // Global state update (ARRAY)
-  filters.program = selectedPrograms;
-
-  console.log("filters.program (array):", filters.program);
-
-  loadData();
-});
-  
+  const el = document.getElementById("filterProgram");
+  const items = programs.map(p => ({ value: p.school_code, label: p.school_name }));
+  el.innerHTML = buildSelectDropdownHTML('PROGRAM', 'All Programs', items, 'program');
+  attachDropdownClick(el, 'program', 'All Programs');
 }
-
-
-
 
 function populateYears(years) {
-   
-    const yearFilter = document.getElementById("filterYear");
-   let html = `
-    <label class="flex items-center gap-[4px]
-      text-[0.7rem] font-[600]
-      text-[#94a3b8]
-      uppercase tracking-[0.05em]">
-      YEAR
-    </label>
-
-    <div class="relative min-w-[120px] multi-select group">
-      <div class="flex items-center justify-between
-        py-[6px] px-[10px]
-        bg-[#ffffff]
-        border border-[#e2e8f0]
-        rounded-[8px]
-        cursor-pointer
-        text-[0.85rem]
-        min-h-[32px]
-        gap-[4px]
-        transition-all duration-[150ms] ease-in-out text-[#64748b] hover:border-[#10b981] group-[.open]:border-[#10b981] group-[.open]:ring-2 group-[.open]:ring-[rgba(16,185,129,0.1)]"
-        id="toggleMultiSelect"
-        data-text="All Years"
-        onclick="toggleMultiSelect(this)">
-
-        <span class="text-[#64748b] whitespace-nowrap overflow-hidden text-ellipsis">
-          All Years
-        </span>
-
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          class="w-[14px] h-[14px] shrink-0 transition-transform duration-[150ms]
-          ease-in-out text-[#94a3b8] group-[.open]:rotate-180">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </div>
-
-      <div class="absolute 
-        top-[calc(100%+4px)]
-        left-0 right-0
-        bg-[#ffffff]
-        border border-[#e2e8f0]
-        rounded-[8px]
-        shadow-[0_10px_15px_-3px_rgb(0_0_0_/_0.1),_0_4px_6px_-4px_rgb(0_0_0_/_0.1)]
-        z-[1]
-        max-h-[250px]
-        overflow-y-auto
-        hidden group-[.open]:block">
-  `;
-
-  // 2️⃣ Dynamic years loop
-  years.forEach(year => {
-    html += `
-      <div class="flex items-center gap-[8px] py-[8px] px-[12px]
-                  cursor-pointer text-[0.85rem]
-                  transition-colors duration-[150ms] ease-in-out"
-           data-value="${year}">
-
-        <input
-          type="checkbox"
-          id="dashYear_${year}"
-          value="${year}"
-          class="yearBox w-[16px] h-[16px] accent-[#10b981] cursor-pointer " >
-
-        <label
-          for="dashYear_${year}"
-          class="flex flex-1 items-center
-                 cursor-pointer
-                 whitespace-nowrap overflow-hidden text-ellipsis
-                 gap-[var(--space-xs)]
-                 text-[0.7rem] font-[600]
-                 text-[#94a3b8]
-                 uppercase tracking-[0.05em]">
-          ${year}
-        </label>
-      </div>
-    `;
-  });
-
-  // 3️⃣ Close dropdown container
-  html += `
-      </div>
-    </div>
-  `;
-
-  yearFilter.innerHTML = html;
-
-  yearFilter.addEventListener("change", (e) => {
-  if (!e.target.classList.contains("yearBox")) return;
-
-  // Saare checked years nikalo
-  const selectedYears = Array.from(
-    yearFilter.querySelectorAll(".yearBox:checked")
-  ).map(cb => cb.value);
-
-  // Global state update (ARRAY)
-  filters.year = selectedYears;
-
-  console.log("filters.year (array):", filters.year);
-
-  loadData();
-});
-    
-
+  const el = document.getElementById("filterYear");
+  const items = years.map(y => ({ value: y, label: y }));
+  el.innerHTML = buildSelectDropdownHTML('YEAR', 'All Years', items, 'year');
+  attachDropdownClick(el, 'year', 'All Years');
 }
 
-
-
-
 function populateSections(sections) {
-  console.log("populateSections",sections);
-    const sectionFilter = document.getElementById("filterSection");
-   let html = `
-    <label class="flex items-center gap-[4px]
-      text-[0.7rem] font-[600]
-      text-[#94a3b8]
-      uppercase tracking-[0.05em]">
-      SECTION
-    </label>
-
-    <div class="relative min-w-[120px] multi-select group">
-      <div class="flex items-center justify-between
-        py-[6px] px-[10px]
-        bg-[#ffffff]
-        border border-[#e2e8f0]
-        rounded-[8px]
-        cursor-pointer
-        text-[0.85rem]
-        min-h-[32px]
-        gap-[4px]
-        transition-all duration-[150ms] ease-in-out text-[#64748b] hover:border-[#10b981] group-[.open]:border-[#10b981] group-[.open]:ring-2 group-[.open]:ring-[rgba(16,185,129,0.1)]"
-        id="toggleMultiSelect"
-        data-text="All Years"
-        onclick="toggleMultiSelect(this)">
-
-        <span class="text-[#64748b] whitespace-nowrap overflow-hidden text-ellipsis">
-          All Sections
-        </span>
-
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          class="w-[14px] h-[14px] shrink-0 transition-transform duration-[150ms]
-          ease-in-out text-[#94a3b8] group-[.open]:rotate-180">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </div>
-
-      <div class="absolute 
-        top-[calc(100%+4px)]
-        left-0 right-0
-        bg-[#ffffff]
-        border border-[#e2e8f0]
-        rounded-[8px]
-        shadow-[0_10px_15px_-3px_rgb(0_0_0_/_0.1),_0_4px_6px_-4px_rgb(0_0_0_/_0.1)]
-        z-[1]
-        max-h-[250px]
-        overflow-y-auto
-        hidden group-[.open]:block">
-  `;
-
-  // 2️⃣ Dynamic years loop
-  sections.forEach(section => {
-    html += `
-      <div class="flex items-center gap-[8px] py-[8px] px-[12px]
-                  cursor-pointer text-[0.85rem]
-                  transition-colors duration-[150ms] ease-in-out"
-           data-value="${section.class_id}">
-
-        <input
-          type="checkbox"
-          id="dashSection_${section.class_id}"
-          value="${section.class_id}"
-          class="sectionBox w-[16px] h-[16px] accent-[#10b981] cursor-pointer " >
-
-        <label
-          for="dashSection_${section.class_id}"
-          class="flex flex-1 items-center
-                 cursor-pointer
-                 whitespace-nowrap overflow-hidden text-ellipsis
-                 gap-[var(--space-xs)]
-                 text-[0.7rem] font-[600]
-                 text-[#94a3b8]
-                 uppercase tracking-[0.05em]">
-          ${section.class_name}
-        </label>
-      </div>
-    `;
-  });
-
-  // 3️⃣ Close dropdown container
-  html += `
-      </div>
-    </div>
-  `;
-
-  sectionFilter.innerHTML = html;
-
-  sectionFilter.addEventListener("change", (e) => {
-  if (!e.target.classList.contains("sectionBox")) return;
-
-  // Saare checked years nikalo
-  const selectedSection = Array.from(
-    sectionFilter.querySelectorAll(".sectionBox:checked")
-  ).map(cb => cb.value);
-
-  // Global state update (ARRAY)
-  filters.section = selectedSection;
-
-  console.log("filters.section (array):", filters.section);
-
-  loadData();
-});
-  
+  const el = document.getElementById("filterSection");
+  const items = sections.map(s => ({ value: s.class_id, label: s.class_name }));
+  el.innerHTML = buildSelectDropdownHTML('SECTION', 'All Sections', items, 'section');
+  attachDropdownClick(el, 'section', 'All Sections');
 }
 
 function populateFaculties(faculties) {
-   console.log("populatefaculties",faculties);
-    const facultyFilter = document.getElementById("filterFaculty");
-   let html = `
-    <label class="flex items-center gap-[4px]
-      text-[0.7rem] font-[600]
-      text-[#94a3b8]
-      uppercase tracking-[0.05em]">
-      FACULTY
-    </label>
-
-    <div class="relative min-w-[120px] multi-select group">
-      <div class="flex items-center justify-between
-        py-[6px] px-[10px]
-        bg-[#ffffff]
-        border border-[#e2e8f0]
-        rounded-[8px]
-        cursor-pointer
-        text-[0.85rem]
-        min-h-[32px]
-        gap-[4px]
-        transition-all duration-[150ms] ease-in-out text-[#64748b] hover:border-[#10b981] group-[.open]:border-[#10b981] group-[.open]:ring-2 group-[.open]:ring-[rgba(16,185,129,0.1)]"
-        id="toggleMultiSelect"
-        data-text="All Years"
-        onclick="toggleMultiSelect(this)">
-
-        <span class="text-[#64748b] whitespace-nowrap overflow-hidden text-ellipsis">
-          All Faculty
-        </span>
-
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          class="w-[14px] h-[14px] shrink-0 transition-transform duration-[150ms]
-          ease-in-out text-[#94a3b8] group-[.open]:rotate-180">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </div>
-
-      <div class="absolute 
-        top-[calc(100%+4px)]
-        left-0 right-0
-        bg-[#ffffff]
-        border border-[#e2e8f0]
-        rounded-[8px]
-        shadow-[0_10px_15px_-3px_rgb(0_0_0_/_0.1),_0_4px_6px_-4px_rgb(0_0_0_/_0.1)]
-        z-[1]
-        max-h-[250px]
-        overflow-y-auto
-        hidden group-[.open]:block">
-  `;
-
-  // 2️⃣ Dynamic years loop
-  faculties.forEach(facultie => {
-    html += `
-      <div class="flex items-center gap-[8px] py-[8px] px-[12px]
-                  cursor-pointer text-[0.85rem]
-                  transition-colors duration-[150ms] ease-in-out"
-           data-value="${facultie.faculty_id}">
-
-        <input
-          type="checkbox"
-          id="dashFaculty_${facultie.faculty_id}"
-          value="${facultie.faculty_id}"
-          class="facultyBox w-[16px] h-[16px] accent-[#10b981] cursor-pointer " >
-
-        <label
-          for="dashFaculty_${facultie.faculty_id}"
-          class="flex flex-1 items-center
-                 cursor-pointer
-                 whitespace-nowrap overflow-hidden text-ellipsis
-                 gap-[var(--space-xs)]
-                 text-[0.7rem] font-[600]
-                 text-[#94a3b8]
-                 uppercase tracking-[0.05em]">
-          ${facultie.faculty_first_name} ${facultie.faculty_last_name}
-        </label>
-      </div>
-    `;
-  });
-
-  // 3️⃣ Close dropdown container
-  html += `
-      </div>
-    </div>
-  `;
-
-  facultyFilter.innerHTML = html;
-
-  facultyFilter.addEventListener("change", (e) => {
-  if (!e.target.classList.contains("facultyBox")) return;
-
-  // Saare checked years nikalo
-  const selectedFaculty = Array.from(
-    facultyFilter.querySelectorAll(".facultyBox:checked")
-  ).map(cb => cb.value);
-
-  // Global state update (ARRAY)
-  filters.faculty = selectedFaculty;
-
-  console.log("filters.faculty (array):", filters.faculty);
-
-  loadData();
-});
-  
+  const el = document.getElementById("filterFaculty");
+  const items = faculties.map(f => ({ value: f.faculty_id, label: `${f.faculty_first_name} ${f.faculty_last_name}` }));
+  el.innerHTML = buildSelectDropdownHTML('FACULTY', 'All Faculty', items, 'faculty');
+  attachDropdownClick(el, 'faculty', 'All Faculty');
 }
 
 function populateRooms(rooms) {
-   console.log("populateRooms",rooms);
-    const roomFilter = document.getElementById("filterRoom");
-   let html = `
-    <label class="flex items-center gap-[4px]
-      text-[0.7rem] font-[600]
-      text-[#94a3b8]
-      uppercase tracking-[0.05em]">
-      ROOM
-    </label>
-
-    <div class="relative min-w-[120px] multi-select group">
-      <div class="flex items-center justify-between
-        py-[6px] px-[10px]
-        bg-[#ffffff]
-        border border-[#e2e8f0]
-        rounded-[8px]
-        cursor-pointer
-        text-[0.85rem]
-        min-h-[32px]
-        gap-[4px]
-        transition-all duration-[150ms] ease-in-out text-[#64748b] hover:border-[#10b981] group-[.open]:border-[#10b981] group-[.open]:ring-2 group-[.open]:ring-[rgba(16,185,129,0.1)]"
-        id="toggleMultiSelect"
-        data-text="All Years"
-        onclick="toggleMultiSelect(this)">
-
-        <span class="text-[#64748b] whitespace-nowrap overflow-hidden text-ellipsis">
-          All Rooms
-        </span>
-
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          class="w-[14px] h-[14px] shrink-0 transition-transform duration-[150ms]
-          ease-in-out text-[#94a3b8] group-[.open]:rotate-180">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </div>
-
-      <div class="absolute 
-        top-[calc(100%+4px)]
-        left-0 right-0
-        bg-[#ffffff]
-        border border-[#e2e8f0]
-        rounded-[8px]
-        shadow-[0_10px_15px_-3px_rgb(0_0_0_/_0.1),_0_4px_6px_-4px_rgb(0_0_0_/_0.1)]
-        z-[1]
-        max-h-[250px]
-        overflow-y-auto
-        hidden group-[.open]:block">
-  `;
-
-  // 2️⃣ Dynamic years loop
-  rooms.forEach(room => {
-    html += `
-      <div class="flex items-center gap-[8px] py-[8px] px-[12px]
-                  cursor-pointer text-[0.85rem]
-                  transition-colors duration-[150ms] ease-in-out"
-           data-value="${room.room_id}">
-
-        <input
-          type="checkbox"
-          id="dashRoom_${room.room_id}"
-          value="${room.room_id}"
-          class="roomBox w-[16px] h-[16px] accent-[#10b981] cursor-pointer " >
-
-        <label
-          for="dashRoom_${room.room_id}"
-          class="flex flex-1 items-center
-                 cursor-pointer
-                 whitespace-nowrap overflow-hidden text-ellipsis
-                 gap-[var(--space-xs)]
-                 text-[0.7rem] font-[600]
-                 text-[#94a3b8]
-                 uppercase tracking-[0.05em]">
-          ${room.room_name}  (${room.floor_name} ${room.floor_building})
-        </label>
-      </div>
-    `;
-  });
-
-  // 3️⃣ Close dropdown container
-  html += `
-      </div>
-    </div>
-  `;
-
-  roomFilter.innerHTML = html;
-
-  roomFilter.addEventListener("change", (e) => {
-  if (!e.target.classList.contains("roomBox")) return;
-
-  // Saare checked years nikalo
-  const selectedRoom = Array.from(
-    roomFilter.querySelectorAll(".roomBox:checked")
-  ).map(cb => cb.value);
-
-  // Global state update (ARRAY)
-  filters.room = selectedRoom;
-
-  console.log("filters.room (array):", filters.room);
-
-  loadData();
-});
-  
+  const el = document.getElementById("filterRoom");
+  const items = rooms.map(r => ({ value: r.room_id, label: `${r.room_name} (${r.floor_name} ${r.floor_building})` }));
+  el.innerHTML = buildSelectDropdownHTML('ROOM', 'All Rooms', items, 'room');
+  attachDropdownClick(el, 'room', 'All Rooms');
 }
 
 function populateSubjects(subjects) {
-   console.log("populateSubjects",subjects);
-    const subjectFilter = document.getElementById("filterSubject");
-   let html = `
-    <label class="flex items-center gap-[4px]
-      text-[0.7rem] font-[600]
-      text-[#94a3b8]
-      uppercase tracking-[0.05em]">
-      SUBJECT
-    </label>
-
-    <div class="relative min-w-[120px] multi-select group">
-      <div class="flex items-center justify-between
-        py-[6px] px-[10px]
-        bg-[#ffffff]
-        border border-[#e2e8f0]
-        rounded-[8px]
-        cursor-pointer
-        text-[0.85rem]
-        min-h-[32px]
-        gap-[4px]
-        transition-all duration-[150ms] ease-in-out text-[#64748b] hover:border-[#10b981] group-[.open]:border-[#10b981] group-[.open]:ring-2 group-[.open]:ring-[rgba(16,185,129,0.1)]"
-        id="toggleMultiSelect"
-        data-text="All Years"
-        onclick="toggleMultiSelect(this)">
-
-        <span class="text-[#64748b] whitespace-nowrap overflow-hidden text-ellipsis">
-          All Subjects
-        </span>
-
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          class="w-[14px] h-[14px] shrink-0 transition-transform duration-[150ms]
-          ease-in-out text-[#94a3b8] group-[.open]:rotate-180">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </div>
-
-      <div class="absolute 
-        top-[calc(100%+4px)]
-        left-0 right-0
-        bg-[#ffffff]
-        border border-[#e2e8f0]
-        rounded-[8px]
-        shadow-[0_10px_15px_-3px_rgb(0_0_0_/_0.1),_0_4px_6px_-4px_rgb(0_0_0_/_0.1)]
-        z-[1]
-        max-h-[250px]
-        overflow-y-auto
-        hidden group-[.open]:block">
-  `;
-
-  // 2️⃣ Dynamic years loop
-  subjects.forEach(subject => {
-    html += `
-      <div class="flex items-center gap-[8px] py-[8px] px-[12px]
-                  cursor-pointer text-[0.85rem]
-                  transition-colors duration-[150ms] ease-in-out"
-           data-value="${subject.subject_id}">
-
-        <input
-          type="checkbox"
-          id="dashSubject_${subject.subject_id}"
-          value="${subject.subject_id}"
-          class="subjectBox w-[16px] h-[16px] accent-[#10b981] cursor-pointer " >
-
-        <label
-          for="dashSubject_${subject.subject_id}"
-          class="flex flex-1 items-center
-                 cursor-pointer
-                 whitespace-nowrap overflow-hidden text-ellipsis
-                 gap-[var(--space-xs)]
-                 text-[0.7rem] font-[600]
-                 text-[#94a3b8]
-                 uppercase tracking-[0.05em]">
-          ${subject.subject_code}   ${subject.subject_name}
-        </label>
-      </div>
-    `;
-  });
-
-  // 3️⃣ Close dropdown container
-  html += `
-      </div>
-    </div>
-  `;
-
-  subjectFilter.innerHTML = html;
-
-  subjectFilter.addEventListener("change", (e) => {
-  if (!e.target.classList.contains("subjectBox")) return;
-
-  // Saare checked years nikalo
-  const selectedSubject = Array.from(
-    subjectFilter.querySelectorAll(".subjectBox:checked")
-  ).map(cb => cb.value);
-
-  // Global state update (ARRAY)
-  filters.subject = selectedSubject;
-
-  console.log("filters.subject (array):", filters.subject);
-
-  loadData();
-});
+  const el = document.getElementById("filterSubject");
+  const items = subjects.map(s => ({ value: s.subject_id, label: `${s.subject_code} ${s.subject_name}` }));
+  el.innerHTML = buildSelectDropdownHTML('SUBJECT', 'All Subjects', items, 'subject');
+  attachDropdownClick(el, 'subject', 'All Subjects');
 }
 
 function populateDays(days) {
- console.log("populateDays",days);
-    const dayFilter = document.getElementById("filterDay");
-   let html = `
-    <label class="flex items-center gap-[4px]
-      text-[0.7rem] font-[600]
-      text-[#94a3b8]
-      uppercase tracking-[0.05em]">
-      DAY
-    </label>
-
-    <div class="relative min-w-[120px] multi-select group">
-      <div class="flex items-center justify-between
-        py-[6px] px-[10px]
-        bg-[#ffffff]
-        border border-[#e2e8f0]
-        rounded-[8px]
-        cursor-pointer
-        text-[0.85rem]
-        min-h-[32px]
-        gap-[4px]
-        transition-all duration-[150ms] ease-in-out text-[#64748b] hover:border-[#10b981] group-[.open]:border-[#10b981] group-[.open]:ring-2 group-[.open]:ring-[rgba(16,185,129,0.1)]"
-        id="toggleMultiSelect"
-        data-text="All Years"
-        onclick="toggleMultiSelect(this)">
-
-        <span class="text-[#64748b] whitespace-nowrap overflow-hidden text-ellipsis">
-          All Days
-        </span>
-
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          class="w-[14px] h-[14px] shrink-0 transition-transform duration-[150ms]
-          ease-in-out text-[#94a3b8] group-[.open]:rotate-180">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </div>
-
-      <div class="absolute 
-        top-[calc(100%+4px)]
-        left-0 right-0
-        bg-[#ffffff]
-        border border-[#e2e8f0]
-        rounded-[8px]
-        shadow-[0_10px_15px_-3px_rgb(0_0_0_/_0.1),_0_4px_6px_-4px_rgb(0_0_0_/_0.1)]
-        z-[1]
-        max-h-[250px]
-        overflow-y-auto
-        hidden group-[.open]:block">
-  `;
-
-  // 2️⃣ Dynamic years loop
-  days.forEach(day => {
-    html += `
-      <div class="flex items-center gap-[8px] py-[8px] px-[12px]
-                  cursor-pointer text-[0.85rem]
-                  transition-colors duration-[150ms] ease-in-out"
-           data-value="${day}">
-
-        <input
-          type="checkbox"
-          id="dashDay_${day}"
-          value="${day}"
-          class="dayBox w-[16px] h-[16px] accent-[#10b981] cursor-pointer " >
-
-        <label
-          for="dashDay_${day}"
-          class="flex flex-1 items-center
-                 cursor-pointer
-                 whitespace-nowrap overflow-hidden text-ellipsis
-                 gap-[var(--space-xs)]
-                 text-[0.7rem] font-[600]
-                 text-[#94a3b8]
-                 uppercase tracking-[0.05em]">
-          ${day}
-        </label>
-      </div>
-    `;
-  });
-
-  // 3️⃣ Close dropdown container
-  html += `
-      </div>
-    </div>
-  `;
-
-  dayFilter.innerHTML = html;
-
-  dayFilter.addEventListener("change", (e) => {
-  if (!e.target.classList.contains("dayBox")) return;
-
-  // Saare checked years nikalo
-  const selectedDay = Array.from(
-    dayFilter.querySelectorAll(".dayBox:checked")
-  ).map(cb => cb.value);
-
-  // Global state update (ARRAY)
-  filters.day = selectedDay;
-
-  console.log("filters.day (array):", filters.day);
-
-  loadData();
-});
+  const el = document.getElementById("filterDay");
+  const items = days.map(d => ({ value: d, label: d }));
+  el.innerHTML = buildSelectDropdownHTML('DAY', 'All Days', items, 'day');
+  attachDropdownClick(el, 'day', 'All Days');
 }
 
 function populateTimes(times) {
-  console.log("populateTimes",times);
-    const timeFilter = document.getElementById("filterTime");
-   let html = `
-    <label class="flex items-center gap-[4px]
-      text-[0.7rem] font-[600]
-      text-[#94a3b8]
-      uppercase tracking-[0.05em]">
-      TIME
-    </label>
-
-    <div class="relative min-w-[120px] multi-select group">
-      <div class="flex items-center justify-between
-        py-[6px] px-[10px]
-        bg-[#ffffff]
-        border border-[#e2e8f0]
-        rounded-[8px]
-        cursor-pointer
-        text-[0.85rem]
-        min-h-[32px]
-        gap-[4px]
-        transition-all duration-[150ms] ease-in-out text-[#64748b] hover:border-[#10b981] group-[.open]:border-[#10b981] group-[.open]:ring-2 group-[.open]:ring-[rgba(16,185,129,0.1)]"
-        id="toggleMultiSelect"
-        data-text="All Years"
-        onclick="toggleMultiSelect(this)">
-
-        <span class="text-[#64748b] whitespace-nowrap overflow-hidden text-ellipsis">
-          All Times
-        </span>
-
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          class="w-[14px] h-[14px] shrink-0 transition-transform duration-[150ms]
-          ease-in-out text-[#94a3b8] group-[.open]:rotate-180">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </div>
-
-      <div class="absolute 
-        top-[calc(100%+4px)]
-        left-0 right-0
-        bg-[#ffffff]
-        border border-[#e2e8f0]
-        rounded-[8px]
-        shadow-[0_10px_15px_-3px_rgb(0_0_0_/_0.1),_0_4px_6px_-4px_rgb(0_0_0_/_0.1)]
-        z-[1]
-        max-h-[250px]
-        overflow-y-auto
-        hidden group-[.open]:block">
-  `;
-
-  // 2️⃣ Dynamic years loop
-  times.forEach(time => {
-    html += `
-      <div class="flex items-center gap-[8px] py-[8px] px-[12px]
-                  cursor-pointer text-[0.85rem]
-                  transition-colors duration-[150ms] ease-in-out"
-           data-value="${time.value}">
-
-        <input
-          type="checkbox"
-          id="dashTime_${time.value}"
-          value="${time.value}"
-          class="timeBox w-[16px] h-[16px] accent-[#10b981] cursor-pointer " >
-
-        <label
-          for="dashTime_${time.value}"
-          class="flex flex-1 items-center
-                 cursor-pointer
-                 whitespace-nowrap overflow-hidden text-ellipsis
-                 gap-[var(--space-xs)]
-                 text-[0.7rem] font-[600]
-                 text-[#94a3b8]
-                 uppercase tracking-[0.05em]">
-          ${time.label}
-        </label>
-      </div>
-    `;
-  });
-
-  // 3️⃣ Close dropdown container
-  html += `
-      </div>
-    </div>
-  `;
-
-  timeFilter.innerHTML = html;
-
-  timeFilter.addEventListener("change", (e) => {
-  if (!e.target.classList.contains("timeBox")) return;
-
-  // Saare checked years nikalo
-  const selectedTime = Array.from(
-    timeFilter.querySelectorAll(".timeBox:checked")
-  ).map(cb => cb.value);
-
-  // Global state update (ARRAY)
-  filters.time = selectedTime;
-
-  console.log("filters.time (array):", filters.time);
-
-  loadData();
-});
+  const el = document.getElementById("filterTime");
+  const items = times.map(t => ({ value: t.value, label: t.label }));
+  el.innerHTML = buildSelectDropdownHTML('TIME', 'All Times', items, 'time');
+  attachDropdownClick(el, 'time', 'All Times');
 }
 
 // Load timetable data
@@ -1009,40 +327,31 @@ async function loadData() {
   showLoading();
 
   try {
-    // Build query string
     const queryParams = new URLSearchParams();
-    console.log(filters,"inside load data");
     Object.keys(filters).forEach((key) => {
-        console.log(key,"filters[key]");
-        if (filters[key] !== "all") {
-            queryParams.append(key, filters[key]);
-        }
+      if (filters[key] !== "all") {
+        queryParams.append(key, filters[key]);
+      }
     });
-    
-    console.log("Query params before filtering:", queryParams);
-    const [timetableRes, statsRes] = await Promise.all(
 
-    [
+    const [timetableRes, statsRes] = await Promise.all([
       fetch(`/api/dashboard/timetable?${queryParams}`),
       fetch(`/api/dashboard/stats?${queryParams}`),
-    ]
-
-
-);
+    ]);
 
     const timetableData = await timetableRes.json();
     const statsData = await statsRes.json();
-    console.log(timetableData,"timetableData");
+
     if (timetableData.success) {
       updateStatistics(statsData.data, timetableData.total);
       renderTimetable(timetableData.data);
     }
-    } catch (error) {
+  } catch (error) {
     console.error("Error loading data:", error);
     showError("Failed to load timetable data");
-    } finally {
+  } finally {
     hideLoading();
-    }
+  }
 }
 
 function updateStatistics(stats, total) {
@@ -1063,11 +372,9 @@ function updateStatistics(stats, total) {
 
 // Render timetable cards
 function renderTimetable(data) {
-
   const container = document.getElementById("timetableContainer");
   const emptyState = document.getElementById("emptyState");
 
-  // Check if data is empty
   const hasData =
     Object.keys(data).length > 0 &&
     Object.values(data).some((day) => day.length > 0);
@@ -1082,13 +389,11 @@ function renderTimetable(data) {
 
   let html = "";
 
-  // Group by day
   Object.keys(data).forEach((dayName) => {
     const classes = data[dayName];
     if (classes.length === 0) return;
 
     html += `
-     
         <div class="px-[24px] py-[16px] bg-[#f8fafc] border-b border-[#e2e8f0] flex items-center gap-[8px]">
         <svg viewBox="0 0 24 24" fill="none" class="text-[#94a3b8]" stroke="currentColor" stroke-width="2" width="18" height="18">
                     <rect x="3" y="4" width="18" height="18" rx="2"></rect>
@@ -1101,7 +406,6 @@ function renderTimetable(data) {
         <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-[16px] p-[24px] bg-white">
           ${classes.map((cls) => renderClassCard(cls)).join("")}
         </div>
-    
     `;
   });
 
@@ -1110,7 +414,6 @@ function renderTimetable(data) {
 
 // Render individual class card
 function renderClassCard(cls) {
-    console.log("renderClassCard",cls.class_year);
   const schoolId = cls.school_id || "default";
   const schoolCode = cls.school_code || "";
   const facultyName =
@@ -1120,8 +423,7 @@ function renderClassCard(cls) {
   const buildingInfo = cls.floor_building
     ? `${cls.floor_building} - ${cls.floor_name}`
     : "";
-
-    const years = cls.class_year || "";
+  const years = cls.class_year || "";
 
   return `
     <div class="relative cursor-pointer bg-white border border-[#e2e8f0] rounded-[8px] p-[16px] transition-all duration-[150ms] ease-in-out hover:border-[#10b981] hover:shadow-[0_4px_6px_-1px_rgb(0_0_0_/_0.1),_0_2px_4px_-2px_rgb(0_0_0_/_0.1)] hover:-translate-y-[1px]" data-school="${schoolId}">
@@ -1135,18 +437,18 @@ function renderClassCard(cls) {
         </span>
         <span class="text-[0.8rem] font-[600] bg-[#f1f5f9] px-[10px] py-[4px] rounded-[4px] text-[#1e293b] border border-[#e2e8f0]">101-B</span>
       </div>
-      
+
       <div class="mb-[8px]">
       <div class="inline-flex items-center gap-[4px] text-[0.75rem] font-[700] text-[#10b981] bg-[rgba(16,185,129,0.1)] px-[8px] py-[3px] rounded-[4px] mb-[6px] uppercase tracking-[0.02em]" data-school="${schoolId}">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[14px] h-[14px]">
                         <rect x="3" y="3" width="18" height="18" rx="2"></rect>
                         <path d="M7 7h10M7 12h10M7 17h6"></path>
-                    </svg>  ${schoolCode === "" ? "No Data": schoolCode}
+                    </svg>  ${schoolCode === "" ? "No Data" : schoolCode}
                     </div>
-       
+
         <div class="text-[0.85rem] font-[500] text-[#64748b] leading-[1.4] line-clamp-2">${cls.subject_name || "N/A"}</div>
       </div>
-      
+
       <div class="flex flex-col gap-[6px] text-[0.8rem] text-[#64748b] mt-[8px] pt-[8px] border-t border-[#f1f5f9]">
         <div class="flex items-center gap-[6px]">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[14px] h-[14px] shrink-0 text-[#94a3b8]">
@@ -1178,12 +480,12 @@ function renderClassCard(cls) {
             : ""
         }
 
-      
+
         <div class="flex items-center gap-[6px]">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[14px] h-[14px] shrink-0 text-[#94a3b8]">
             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
           </svg>
-          <span>${roomInfo}${buildingInfo ? " • " + buildingInfo : ""}dddfaizan</span>
+          <span>${roomInfo}${buildingInfo ? " • " + buildingInfo : ""}</span>
         </div>
       </div>
     </div>
@@ -1208,52 +510,68 @@ function showError(message) {
   alert(message);
 }
 
-// Attach event listeners
-function attachEventListeners() {
- 
+// ─── Clear filters ──────────────────────────────────────────
+function clearFilters() {
+  const todayStr = new Date().toISOString().split("T")[0];
+  filters = {
+    date: todayStr,
+    program: "all",
+    year: "all",
+    section: "all",
+    faculty: "all",
+    room: "all",
+    subject: "all",
+    day: "all",
+    time: "all",
+  };
 
-  // Clear filters
-  document.getElementById("clearFilters").addEventListener("click", () => {
-    filters = {
-      date: new Date().toISOString().split("T")[0],
-      program: "all",
-      year: "all",
-      section: "all",
-      faculty: "all",
-      room: "all",
-      subject: "all",
-      day: "all",
-      time: "all",
-    };
-
-    // Reset all selects
-    document.getElementById("dateFilter").value = filters.date;
-    document.getElementById("programFilter").value = "all";
-    document.getElementById("yearFilter").value = "all";
-    document.getElementById("sectionFilter").value = "all";
-    document.getElementById("facultyFilter").value = "all";
-    document.getElementById("roomFilter").value = "all";
-    document.getElementById("subjectFilter").value = "all";
-    document.getElementById("dayFilter").value = "all";
-    document.getElementById("timeFilter").value = "all";
-
-    loadData();
+  // Reset date
+  document.getElementById('dateHeaderText').textContent = todayStr;
+  const dateContainer = document.getElementById('filterDate');
+  dateContainer.querySelectorAll('.dropdown-option').forEach(o => {
+    o.classList.remove('selected', 'text-[#1e293b]');
+    o.classList.add('text-[#94a3b8]');
   });
+  const todayOption = dateContainer.querySelector(`.dropdown-option[data-value="${todayStr}"]`);
+  if (todayOption) {
+    todayOption.classList.add('selected', 'text-[#1e293b]');
+    todayOption.classList.remove('text-[#94a3b8]');
+  }
+
+  // Reset all other dropdowns
+  const labels = {
+    program: 'All Programs',
+    year: 'All Years',
+    section: 'All Sections',
+    faculty: 'All Faculty',
+    room: 'All Rooms',
+    subject: 'All Subjects',
+    day: 'All Days',
+    time: 'All Times'
+  };
+
+  Object.keys(labels).forEach(key => {
+    const headerText = document.getElementById(`${key}HeaderText`);
+    if (headerText) headerText.textContent = labels[key];
+
+    const containerEl = document.getElementById(`filter${key.charAt(0).toUpperCase() + key.slice(1)}`);
+    if (containerEl) {
+      containerEl.querySelectorAll('.dropdown-option').forEach(o => {
+        o.classList.remove('selected', 'text-[#1e293b]');
+        o.classList.add('text-[#94a3b8]');
+      });
+      const allOption = containerEl.querySelector('.dropdown-option[data-value="all"]');
+      if (allOption) {
+        allOption.classList.add('selected', 'text-[#1e293b]');
+        allOption.classList.remove('text-[#94a3b8]');
+      }
+    }
+  });
+
+  loadData();
 }
 
-function toggleMultiSelect(displayEl) {
-    console.log(displayEl,"displayEl");
-      
-    const container = displayEl.parentElement;
-    const wasOpen = container.classList.contains('open');
-    
-    // Close all other dropdowns
-    document.querySelectorAll('.multi-select.open').forEach(ms => {
-        ms.classList.remove('open');
-    });
-    
-    // Toggle this one
-    if (!wasOpen) {
-        container.classList.add('open');
-    }
+// Attach event listeners
+function attachEventListeners() {
+  document.getElementById("clearFilters").addEventListener("click", clearFilters);
 }
