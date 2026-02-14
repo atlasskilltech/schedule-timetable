@@ -4,8 +4,8 @@ let filters = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-  initDatePicker('filterStartDate', 'startDate', 'START DATE', 'startDateHeaderText');
-  initDatePicker('filterEndDate', 'endDate', 'END DATE', 'endDateHeaderText');
+  initDatePicker('filterStartDate', 'startDate', 'START DATE', 'startDateInput');
+  initDatePicker('filterEndDate', 'endDate', 'END DATE', 'endDateInput');
   loadDays();
 });
 
@@ -25,116 +25,35 @@ document.addEventListener('click', (e) => {
 });
 
 // ─── Date Picker ────────────────────────────────────────────
-function initDatePicker(containerId, filterKey, label, headerTextId) {
+function initDatePicker(containerId, filterKey, label, inputId) {
   const container = document.getElementById(containerId);
-  const today = new Date();
-  const currentYear = today.getFullYear();
-  const format = d => d.toISOString().split('T')[0];
   const selectedStr = filters[filterKey];
 
-  let html = `
+  container.innerHTML = `
     <label class="flex items-center gap-[4px]
       text-[0.7rem] font-[600]
       text-[#94a3b8]
       uppercase tracking-[0.05em]">
       ${label}
     </label>
-    <div class="relative min-w-[120px] multi-select group">
-      <div class="flex items-center justify-between
-        py-[6px] px-[10px]
+    <input type="date" id="${inputId}" value="${selectedStr}"
+      class="py-[6px] px-[10px]
         bg-[#ffffff]
         border border-[#e2e8f0]
         rounded-[8px]
-        cursor-pointer
         text-[0.85rem]
         min-h-[32px]
-        gap-[4px]
-        transition-all duration-[150ms] ease-in-out text-[#64748b] hover:border-[#10b981] group-[.open]:border-[#10b981] group-[.open]:ring-2 group-[.open]:ring-[rgba(16,185,129,0.1)]"
-        onclick="toggleMultiSelect(this)">
-        <span class="text-[#64748b] whitespace-nowrap overflow-hidden text-ellipsis" id="${headerTextId}">
-          ${selectedStr}
-        </span>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          class="w-[14px] h-[14px] shrink-0 transition-transform duration-[150ms]
-          ease-in-out text-[#94a3b8] group-[.open]:rotate-180">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </div>
-      <div class="absolute
-        top-[calc(100%+4px)]
-        left-0
-        min-w-[160px]
-        bg-[#ffffff]
-        border border-[#e2e8f0]
-        rounded-[8px]
-        shadow-[0_10px_15px_-3px_rgb(0_0_0_/_0.1),_0_4px_6px_-4px_rgb(0_0_0_/_0.1)]
-        z-[1]
-        max-h-[250px]
-        overflow-y-auto
-        hidden group-[.open]:block">
+        transition-all duration-[150ms] ease-in-out
+        text-[#64748b]
+        hover:border-[#10b981]
+        focus:border-[#10b981] focus:ring-2 focus:ring-[rgba(16,185,129,0.1)] focus:outline-none
+        w-full cursor-pointer" />
   `;
 
-  for (let month = 0; month < 12; month++) {
-    const monthName = new Date(currentYear, month, 1).toLocaleString('en-US', { month: 'long' });
-    html += `
-      <div class="px-[12px] py-[6px] text-[0.65rem] font-[700] text-[#64748b] bg-[#f8fafc] uppercase tracking-[0.05em] sticky top-0">
-        ${monthName} ${currentYear}
-      </div>
-    `;
-    const daysInMonth = new Date(currentYear, month + 1, 0).getDate();
-    for (let day = 1; day <= daysInMonth; day++) {
-      const d = new Date(currentYear, month, day);
-      const value = format(d);
-      const isSelected = value === selectedStr;
-      html += `
-        <div class="dropdown-option py-[6px] px-[12px]
-                    cursor-pointer
-                    text-[0.7rem] font-[600] ${isSelected ? 'text-[#1e293b] selected' : 'text-[#94a3b8]'} uppercase tracking-[0.05em]
-                    hover:bg-[#f1f5f9]
-                    transition-colors duration-[150ms] ease-in-out"
-             data-value="${value}">
-          ${value}
-        </div>
-      `;
-    }
-  }
-
-  html += `
-      </div>
-    </div>
-  `;
-
-  container.innerHTML = html;
-
-  container.addEventListener('click', (e) => {
-    const option = e.target.closest('.dropdown-option');
-    if (!option) return;
-    const value = option.dataset.value;
-
-    container.querySelectorAll('.dropdown-option').forEach(o => {
-      o.classList.remove('selected', 'text-[#1e293b]');
-      o.classList.add('text-[#94a3b8]');
-    });
-    option.classList.add('selected');
-    option.classList.remove('text-[#94a3b8]');
-    option.classList.add('text-[#1e293b]');
-
-    filters[filterKey] = value;
-    document.getElementById(headerTextId).textContent = value;
-    container.querySelector('.multi-select')?.classList.remove('open');
+  document.getElementById(inputId).addEventListener('change', (e) => {
+    filters[filterKey] = e.target.value;
     loadDays();
   });
-
-  // Scroll to selected date on first open
-  const trigger = container.querySelector('[onclick]');
-  if (trigger) {
-    trigger.setAttribute('onclick', '');
-    trigger.addEventListener('click', function handler() {
-      toggleMultiSelect(this);
-      const selected = container.querySelector('.dropdown-option.selected');
-      if (selected) selected.scrollIntoView({ block: 'center' });
-    });
-  }
 }
 
 // ─── Load days ──────────────────────────────────────────────
@@ -317,29 +236,10 @@ function clearFilters() {
   filters.startDate = todayStr;
   filters.endDate = weekLater;
 
-  document.getElementById('startDateHeaderText').textContent = todayStr;
-  const startContainer = document.getElementById('filterStartDate');
-  startContainer.querySelectorAll('.dropdown-option').forEach(o => {
-    o.classList.remove('selected', 'text-[#1e293b]');
-    o.classList.add('text-[#94a3b8]');
-  });
-  const startOption = startContainer.querySelector(`.dropdown-option[data-value="${todayStr}"]`);
-  if (startOption) {
-    startOption.classList.add('selected', 'text-[#1e293b]');
-    startOption.classList.remove('text-[#94a3b8]');
-  }
-
-  document.getElementById('endDateHeaderText').textContent = weekLater;
-  const endContainer = document.getElementById('filterEndDate');
-  endContainer.querySelectorAll('.dropdown-option').forEach(o => {
-    o.classList.remove('selected', 'text-[#1e293b]');
-    o.classList.add('text-[#94a3b8]');
-  });
-  const endOption = endContainer.querySelector(`.dropdown-option[data-value="${weekLater}"]`);
-  if (endOption) {
-    endOption.classList.add('selected', 'text-[#1e293b]');
-    endOption.classList.remove('text-[#94a3b8]');
-  }
+  const startInput = document.getElementById('startDateInput');
+  if (startInput) startInput.value = todayStr;
+  const endInput = document.getElementById('endDateInput');
+  if (endInput) endInput.value = weekLater;
 
   loadDays();
 }
