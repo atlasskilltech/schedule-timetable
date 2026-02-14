@@ -5,7 +5,6 @@ let filters = {
   date: new Date().toISOString().split('T')[0],
   building: 'all',
   floor: 'all',
-  class: 'all',
   category: 'all',
   school: 'all',
   showAvailable: true,
@@ -198,10 +197,9 @@ async function loadFilterOptions() {
     const response = await fetch('/infra/api/filter-options');
     const data = await response.json();
     if (data.success) {
-      populateDateFilter();
+      initDatePicker();
       populateBuildingFilter(data.data.buildings);
       populateFloorFilter(data.data.floors);
-      populateClassFilter(data.data.classes);
       populateCategoryFilter(data.data.categories);
     }
   } catch (error) {
@@ -209,85 +207,14 @@ async function loadFilterOptions() {
   }
 }
 
-function populateDateFilter() {
-  const dateFilter = document.getElementById('filterDate');
-  const today = new Date();
-  const currentYear = today.getFullYear();
-  const format = d => d.toISOString().split('T')[0];
-  const todayStr = format(today);
-
+function initDatePicker() {
+  const dateInput = document.getElementById('filterDate');
+  const todayStr = new Date().toISOString().split('T')[0];
+  dateInput.value = todayStr;
   filters.date = todayStr;
 
-  let html = `
-    <label class="flex items-center gap-[4px]
-      text-[0.7rem] font-[600]
-      text-[#94a3b8]
-      uppercase tracking-[0.05em]">
-      DATE
-    </label>
-    <div class="relative min-w-[120px] multi-select group">
-      <div class="flex items-center justify-between
-        py-[6px] px-[10px]
-        bg-[#ffffff]
-        border border-[#e2e8f0]
-        rounded-[8px]
-        cursor-pointer
-        text-[0.85rem]
-        min-h-[32px]
-        gap-[4px]
-        transition-all duration-[150ms] ease-in-out text-[#64748b] hover:border-[#10b981] group-[.open]:border-[#10b981] group-[.open]:ring-2 group-[.open]:ring-[rgba(16,185,129,0.1)]"
-        onclick="toggleMultiSelect(this)">
-        <span id="dateHeaderText">${todayStr}</span>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          class="w-[14px] h-[14px] shrink-0 text-[#94a3b8]">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </div>
-      <div class="absolute
-        top-[calc(100%+4px)]
-        left-0 right-0
-        bg-[#ffffff]
-        border border-[#e2e8f0]
-        rounded-[8px]
-        shadow-[0_10px_15px_-3px_rgb(0_0_0_/_0.1),_0_4px_6px_-4px_rgb(0_0_0_/_0.1)]
-        z-[1]
-        max-h-[250px]
-        overflow-y-auto
-        hidden group-[.open]:block">
-  `;
-
-  for (let month = 0; month < 12; month++) {
-    const monthName = new Date(currentYear, month, 1).toLocaleString('en-US', { month: 'long' });
-    html += `
-      <div class="px-[12px] py-[6px] text-[0.7rem] font-bold text-slate-500 bg-slate-100">
-        ${monthName} ${currentYear}
-      </div>
-    `;
-    const daysInMonth = new Date(currentYear, month + 1, 0).getDate();
-    for (let day = 1; day <= daysInMonth; day++) {
-      const d = new Date(currentYear, month, day);
-      const value = format(d);
-      html += `
-        <div class="flex items-center gap-[8px] py-[6px] px-[12px] cursor-pointer text-[0.85rem]">
-          <input type="radio" name="dateRadio" value="${value}"
-            class="dateRadio accent-[#10b981]" ${value === todayStr ? 'checked' : ''} />
-          <label class="text-[0.7rem] font-[600] text-[#94a3b8] uppercase">${value}</label>
-        </div>
-      `;
-    }
-  }
-
-  html += `
-      </div>
-    </div>
-  `;
-
-  dateFilter.innerHTML = html;
-
-  dateFilter.addEventListener('change', (e) => {
-    if (!e.target.classList.contains('dateRadio')) return;
+  dateInput.addEventListener('change', (e) => {
     filters.date = e.target.value;
-    document.getElementById('dateHeaderText').textContent = e.target.value;
     loadData();
   });
 }
@@ -314,19 +241,6 @@ function populateFloorFilter(floors) {
     filters.floor = e.target.value;
     document.getElementById('floorHeaderText').textContent =
       e.target.value === 'all' ? 'All Floors' : e.target.value;
-    applyFilters();
-  });
-}
-
-function populateClassFilter(classes) {
-  const el = document.getElementById('filterClass');
-  const items = classes.map(c => ({ value: c, label: c }));
-  el.innerHTML = buildSelectDropdownHTML('CLASS', 'All Classes', items, 'class');
-  el.addEventListener('change', (e) => {
-    if (!e.target.classList.contains('classRadio')) return;
-    filters.class = e.target.value;
-    document.getElementById('classHeaderText').textContent =
-      e.target.value === 'all' ? 'All Classes' : e.target.value;
     applyFilters();
   });
 }
@@ -371,11 +285,6 @@ function scheduleMatchesSchool(schedule) {
   return mergedKey.includes(schoolId);
 }
 
-function scheduleMatchesClass(schedule) {
-  if (filters.class === 'all') return true;
-  return schedule.class === filters.class;
-}
-
 // ─── Apply all filters ──────────────────────────────────────
 function applyFilters() {
   filteredRooms = [];
@@ -391,15 +300,15 @@ function applyFilters() {
 
     // Filter schedules within this room
     const matchedSchedules = room.schedules.filter(s =>
-      scheduleMatchesSchool(s) && scheduleMatchesClass(s)
+      scheduleMatchesSchool(s)
     );
 
     const hasMatched = matchedSchedules.length > 0;
     if (!filters.showAvailable && !hasMatched) return;
     if (!filters.showOccupied && hasMatched) return;
 
-    // If school or class filter active, skip rooms with no matching schedules
-    if ((filters.school !== 'all' || filters.class !== 'all') && !hasMatched) return;
+    // If school filter active, skip rooms with no matching schedules
+    if (filters.school !== 'all' && !hasMatched) return;
 
     filteredRooms.push({ ...room, schedules: matchedSchedules });
   });
@@ -596,19 +505,23 @@ function getSchoolLabel(id) {
 function clearFilters() {
   filters.building = 'all';
   filters.floor = 'all';
-  filters.class = 'all';
   filters.category = 'all';
   filters.school = 'all';
   filters.showAvailable = true;
   filters.showOccupied = true;
 
+  // Reset date to today
+  const todayStr = new Date().toISOString().split('T')[0];
+  filters.date = todayStr;
+  document.getElementById('filterDate').value = todayStr;
+
   // Reset radio buttons to "all"
-  ['building', 'floor', 'class', 'category'].forEach(prefix => {
+  ['building', 'floor', 'category'].forEach(prefix => {
     const allRadio = document.querySelector(`input.${prefix}Radio[value="all"]`);
     if (allRadio) allRadio.checked = true;
     const headerText = document.getElementById(`${prefix}HeaderText`);
     if (headerText) {
-      const labels = { building: 'All Buildings', floor: 'All Floors', class: 'All Classes', category: 'All Categories' };
+      const labels = { building: 'All Buildings', floor: 'All Floors', category: 'All Categories' };
       headerText.textContent = labels[prefix];
     }
   });
