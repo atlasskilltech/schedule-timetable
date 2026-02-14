@@ -78,15 +78,13 @@ exports.getFilterOptions = async (req, res) => {
     const [buildings] = await pool.query(`SELECT DISTINCT floor_building AS building FROM dice_floor WHERE floor_building != ' ' ORDER BY floor_building ASC`);
     const [floors] = await pool.query(`SELECT DISTINCT floor_name AS floor FROM dice_floor WHERE floor_building != ' ' ORDER BY floor_name ASC`);
     const [categories] = await pool.query(`SELECT DISTINCT room_category FROM dice_room WHERE room_is_delete = 0 AND room_category IS NOT NULL AND room_category != '' ORDER BY room_category ASC`);
-    const [classes] = await pool.query(`SELECT DISTINCT class_name FROM dice_class WHERE class_name IS NOT NULL AND class_name != '' ORDER BY class_name ASC`);
 
     res.json({
       success: true,
       data: {
         buildings: buildings.map(b => b.building),
         floors: floors.map(f => f.floor),
-        categories: categories.map(c => c.room_category),
-        classes: classes.map(c => c.class_name)
+        categories: categories.map(c => c.room_category)
       }
     });
   } catch (error) {
