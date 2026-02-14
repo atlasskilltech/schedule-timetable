@@ -1,26 +1,13 @@
 <%- include('partials/header', { active: 'by-division' }) %>
-   
-   
+
 <div class="p-[32px]">
-      <div class="filters-container">
-        <div class="filter-grid" style="grid-template-columns: repeat(2, 1fr);">
-          <div class="filter-item">
-            <label>📅 DATE</label>
-            <input type="date" id="dateFilter" class="filter-input">
-          </div>
-          
-          <div class="filter-item">
-            <label>🎓 PROGRAM</label>
-            <select id="programFilter" class="filter-select">
-              <option value="all">All Programs</option>
-            </select>
-          </div>
-        </div>
+      <div class="flex flex-wrap items-end gap-[4px] py-[8px] px-[16px] bg-[#ffffff] border border-[#e2e8f0] rounded-[12px] mb-[16px]">
+        <div class="min-w-[100px] flex flex-col gap-[2px] shrink basis-auto grow-0" id="filterDate"></div>
+        <div class="min-w-[100px] flex flex-col gap-[2px] shrink basis-auto grow-0" id="filterProgram"></div>
+        <button class="bg-slate-100 text-slate-800 border border-slate-200 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-[0.85rem] font-medium cursor-pointer transition-all duration-[150ms] ease-in-out h-fit whitespace-nowrap" id="clearFilters">Clear</button>
       </div>
 
-      <div id="divisionsContainer" class="timetable-cards">
-        <!-- Division cards will be loaded here -->
-      </div>
+      <div id="divisionsContainer" class="timetable-cards"></div>
 
       <div id="loadingState" class="loading-state" style="display: none;">
         <div class="spinner"></div>

@@ -4,38 +4,261 @@ let filters = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-  initializeFilters();
+  initDatePicker();
   loadFilterOptions();
   loadFaculties();
-  attachEventListeners();
 });
 
-function initializeFilters() {
-  document.getElementById('dateFilter').value = filters.date;
+// ─── Multi-select dropdown toggle ───────────────────────────
+function toggleMultiSelect(displayEl) {
+  const container = displayEl.parentElement;
+  const wasOpen = container.classList.contains('open');
+  document.querySelectorAll('.multi-select.open').forEach(ms => ms.classList.remove('open'));
+  if (!wasOpen) container.classList.add('open');
 }
 
+// Close dropdowns when clicking outside
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.multi-select')) {
+    document.querySelectorAll('.multi-select.open').forEach(ms => ms.classList.remove('open'));
+  }
+});
+
+// ─── Dropdown builder helper ────────────────────────────────
+function buildSelectDropdownHTML(label, placeholder, items, idPrefix) {
+  let html = `
+    <label class="flex items-center gap-[4px]
+      text-[0.7rem] font-[600]
+      text-[#94a3b8]
+      uppercase tracking-[0.05em]">
+      ${label}
+    </label>
+    <div class="relative min-w-[120px] multi-select group">
+      <div class="flex items-center justify-between
+        py-[6px] px-[10px]
+        bg-[#ffffff]
+        border border-[#e2e8f0]
+        rounded-[8px]
+        cursor-pointer
+        text-[0.85rem]
+        min-h-[32px]
+        gap-[4px]
+        transition-all duration-[150ms] ease-in-out text-[#64748b] hover:border-[#10b981] group-[.open]:border-[#10b981] group-[.open]:ring-2 group-[.open]:ring-[rgba(16,185,129,0.1)]"
+        onclick="toggleMultiSelect(this)">
+        <span class="text-[#64748b] whitespace-nowrap overflow-hidden text-ellipsis" id="${idPrefix}HeaderText">
+          ${placeholder}
+        </span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          class="w-[14px] h-[14px] shrink-0 transition-transform duration-[150ms]
+          ease-in-out text-[#94a3b8] group-[.open]:rotate-180">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </div>
+      <div class="absolute
+        top-[calc(100%+4px)]
+        left-0 right-0
+        bg-[#ffffff]
+        border border-[#e2e8f0]
+        rounded-[8px]
+        shadow-[0_10px_15px_-3px_rgb(0_0_0_/_0.1),_0_4px_6px_-4px_rgb(0_0_0_/_0.1)]
+        z-[1]
+        max-h-[250px]
+        overflow-y-auto
+        hidden group-[.open]:block">
+  `;
+
+  html += `
+    <div class="dropdown-option selected py-[8px] px-[12px]
+                cursor-pointer
+                text-[0.7rem] font-[600] text-[#1e293b] uppercase tracking-[0.05em]
+                hover:bg-[#f1f5f9]
+                transition-colors duration-[150ms] ease-in-out"
+         data-value="all">
+      ${placeholder}
+    </div>
+  `;
+
+  items.forEach(item => {
+    html += `
+      <div class="dropdown-option py-[8px] px-[12px]
+                  cursor-pointer
+                  text-[0.7rem] font-[600] text-[#94a3b8] uppercase tracking-[0.05em]
+                  hover:bg-[#f1f5f9]
+                  transition-colors duration-[150ms] ease-in-out"
+           data-value="${item.value}">
+        ${item.label}
+      </div>
+    `;
+  });
+
+  html += `
+      </div>
+    </div>
+  `;
+
+  return html;
+}
+
+function attachDropdownClick(container, filterKey, placeholder) {
+  container.addEventListener('click', (e) => {
+    const option = e.target.closest('.dropdown-option');
+    if (!option) return;
+    const value = option.dataset.value;
+
+    container.querySelectorAll('.dropdown-option').forEach(o => {
+      o.classList.remove('selected', 'text-[#1e293b]');
+      o.classList.add('text-[#94a3b8]');
+    });
+    option.classList.add('selected');
+    option.classList.remove('text-[#94a3b8]');
+    option.classList.add('text-[#1e293b]');
+
+    filters[filterKey] = value;
+    document.getElementById(`${filterKey}HeaderText`).textContent =
+      value === 'all' ? placeholder : option.textContent.trim();
+
+    container.querySelector('.multi-select')?.classList.remove('open');
+    loadFaculties();
+  });
+}
+
+// ─── Date Picker ────────────────────────────────────────────
+function initDatePicker() {
+  const container = document.getElementById('filterDate');
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const format = d => d.toISOString().split('T')[0];
+  const todayStr = format(today);
+  filters.date = todayStr;
+
+  let html = `
+    <label class="flex items-center gap-[4px]
+      text-[0.7rem] font-[600]
+      text-[#94a3b8]
+      uppercase tracking-[0.05em]">
+      DATE
+    </label>
+    <div class="relative min-w-[120px] multi-select group">
+      <div class="flex items-center justify-between
+        py-[6px] px-[10px]
+        bg-[#ffffff]
+        border border-[#e2e8f0]
+        rounded-[8px]
+        cursor-pointer
+        text-[0.85rem]
+        min-h-[32px]
+        gap-[4px]
+        transition-all duration-[150ms] ease-in-out text-[#64748b] hover:border-[#10b981] group-[.open]:border-[#10b981] group-[.open]:ring-2 group-[.open]:ring-[rgba(16,185,129,0.1)]"
+        onclick="toggleMultiSelect(this)">
+        <span class="text-[#64748b] whitespace-nowrap overflow-hidden text-ellipsis" id="dateHeaderText">
+          ${todayStr}
+        </span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          class="w-[14px] h-[14px] shrink-0 transition-transform duration-[150ms]
+          ease-in-out text-[#94a3b8] group-[.open]:rotate-180">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </div>
+      <div class="absolute
+        top-[calc(100%+4px)]
+        left-0
+        min-w-[160px]
+        bg-[#ffffff]
+        border border-[#e2e8f0]
+        rounded-[8px]
+        shadow-[0_10px_15px_-3px_rgb(0_0_0_/_0.1),_0_4px_6px_-4px_rgb(0_0_0_/_0.1)]
+        z-[1]
+        max-h-[250px]
+        overflow-y-auto
+        hidden group-[.open]:block">
+  `;
+
+  for (let month = 0; month < 12; month++) {
+    const monthName = new Date(currentYear, month, 1).toLocaleString('en-US', { month: 'long' });
+    html += `
+      <div class="px-[12px] py-[6px] text-[0.65rem] font-[700] text-[#64748b] bg-[#f8fafc] uppercase tracking-[0.05em] sticky top-0">
+        ${monthName} ${currentYear}
+      </div>
+    `;
+    const daysInMonth = new Date(currentYear, month + 1, 0).getDate();
+    for (let day = 1; day <= daysInMonth; day++) {
+      const d = new Date(currentYear, month, day);
+      const value = format(d);
+      const isToday = value === todayStr;
+      html += `
+        <div class="dropdown-option py-[6px] px-[12px]
+                    cursor-pointer
+                    text-[0.7rem] font-[600] ${isToday ? 'text-[#1e293b] selected' : 'text-[#94a3b8]'} uppercase tracking-[0.05em]
+                    hover:bg-[#f1f5f9]
+                    transition-colors duration-[150ms] ease-in-out"
+             data-value="${value}">
+          ${value}
+        </div>
+      `;
+    }
+  }
+
+  html += `
+      </div>
+    </div>
+  `;
+
+  container.innerHTML = html;
+
+  container.addEventListener('click', (e) => {
+    const option = e.target.closest('.dropdown-option');
+    if (!option) return;
+    const value = option.dataset.value;
+
+    container.querySelectorAll('.dropdown-option').forEach(o => {
+      o.classList.remove('selected', 'text-[#1e293b]');
+      o.classList.add('text-[#94a3b8]');
+    });
+    option.classList.add('selected');
+    option.classList.remove('text-[#94a3b8]');
+    option.classList.add('text-[#1e293b]');
+
+    filters.date = value;
+    document.getElementById('dateHeaderText').textContent = value;
+    container.querySelector('.multi-select')?.classList.remove('open');
+    loadFaculties();
+  });
+
+  const trigger = container.querySelector('[onclick]');
+  if (trigger) {
+    trigger.setAttribute('onclick', '');
+    trigger.addEventListener('click', function handler() {
+      toggleMultiSelect(this);
+      const selected = container.querySelector('.dropdown-option.selected');
+      if (selected) selected.scrollIntoView({ block: 'center' });
+    });
+  }
+}
+
+// ─── Load filter options ────────────────────────────────────
 async function loadFilterOptions() {
   try {
     const response = await fetch('/api/dashboard/filters');
     const data = await response.json();
-    
+
     if (data.success) {
-      const select = document.getElementById('facultyFilter');
-      data.data.faculties.forEach(faculty => {
-        const option = document.createElement('option');
-        option.value = faculty.faculty_id;
-        option.textContent = `${faculty.faculty_first_name} ${faculty.faculty_last_name}`;
-        select.appendChild(option);
-      });
+      const el = document.getElementById('filterFaculty');
+      const items = data.data.faculties.map(f => ({
+        value: f.faculty_id,
+        label: `${f.faculty_first_name} ${f.faculty_last_name}`
+      }));
+      el.innerHTML = buildSelectDropdownHTML('FACULTY', 'All Faculty', items, 'facultyId');
+      attachDropdownClick(el, 'facultyId', 'All Faculty');
     }
   } catch (error) {
     console.error('Error loading filter options:', error);
   }
 }
 
+// ─── Load faculties ─────────────────────────────────────────
 async function loadFaculties() {
   showLoading();
-  
+
   try {
     const queryParams = new URLSearchParams();
     Object.keys(filters).forEach(key => {
@@ -43,10 +266,10 @@ async function loadFaculties() {
         queryParams.append(key, filters[key]);
       }
     });
-    
+
     const response = await fetch(`/timetable/api/by-faculty?${queryParams}`);
     const data = await response.json();
-    
+
     if (data.success) {
       renderFaculties(data.data);
     }
@@ -60,15 +283,15 @@ async function loadFaculties() {
 function renderFaculties(faculties) {
   const container = document.getElementById('facultiesContainer');
   const emptyState = document.getElementById('emptyState');
-  
+
   if (faculties.length === 0) {
     container.innerHTML = '';
     emptyState.style.display = 'block';
     return;
   }
-  
+
   emptyState.style.display = 'none';
-  
+
   const html = `
     <div class="class-cards-grid">
       ${faculties.map(faculty => `
@@ -77,7 +300,7 @@ function renderFaculties(faculties) {
             <span class="subject-badge">👨‍🏫</span>
             <div class="subject-name">${faculty.faculty_first_name} ${faculty.faculty_last_name}</div>
           </div>
-          
+
           <div class="card-info">
             ${faculty.schools ? `
             <div class="card-info-row">
@@ -87,7 +310,7 @@ function renderFaculties(faculties) {
               <span>${faculty.schools}</span>
             </div>
             ` : ''}
-            
+
             <div class="card-info-row">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -97,7 +320,7 @@ function renderFaculties(faculties) {
               </svg>
               <span>${faculty.total_classes} classes today</span>
             </div>
-            
+
             ${faculty.first_class ? `
             <div class="card-info-row">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -112,7 +335,7 @@ function renderFaculties(faculties) {
       `).join('')}
     </div>
   `;
-  
+
   container.innerHTML = html;
 }
 
@@ -133,16 +356,16 @@ async function viewFacultyDetails(facultyId) {
       </div>
     </div>
   `;
-  
+
   document.body.appendChild(modal);
-  
+
   try {
     const response = await fetch(`/timetable/api/faculty-details?facultyId=${facultyId}&date=${filters.date}`);
     const data = await response.json();
-    
+
     if (data.success) {
       const modalBody = modal.querySelector('.modal-body');
-      
+
       if (data.data.length === 0) {
         modalBody.innerHTML = `
           <div class="empty-state">
@@ -160,7 +383,7 @@ async function viewFacultyDetails(facultyId) {
                 <div class="schedule-details">
                   <div class="schedule-subject">${cls.subject_name || 'N/A'}</div>
                   <div class="schedule-meta">
-                    👥 ${cls.class_name || 'N/A'} • 
+                    👥 ${cls.class_name || 'N/A'} •
                     🏢 ${cls.room_name || 'N/A'} ${cls.floor_building ? '(' + cls.floor_building + ')' : ''}
                     ${cls.school_name ? '• 🎓 ' + cls.school_name : ''}
                   </div>
@@ -183,6 +406,42 @@ async function viewFacultyDetails(facultyId) {
   }
 }
 
+// ─── Clear filters ──────────────────────────────────────────
+function clearFilters() {
+  filters.facultyId = 'all';
+
+  const todayStr = new Date().toISOString().split('T')[0];
+  filters.date = todayStr;
+  document.getElementById('dateHeaderText').textContent = todayStr;
+  const dateContainer = document.getElementById('filterDate');
+  dateContainer.querySelectorAll('.dropdown-option').forEach(o => {
+    o.classList.remove('selected', 'text-[#1e293b]');
+    o.classList.add('text-[#94a3b8]');
+  });
+  const todayOption = dateContainer.querySelector(`.dropdown-option[data-value="${todayStr}"]`);
+  if (todayOption) {
+    todayOption.classList.add('selected', 'text-[#1e293b]');
+    todayOption.classList.remove('text-[#94a3b8]');
+  }
+
+  const headerText = document.getElementById('facultyIdHeaderText');
+  if (headerText) headerText.textContent = 'All Faculty';
+  const facultyContainer = document.getElementById('filterFaculty');
+  if (facultyContainer) {
+    facultyContainer.querySelectorAll('.dropdown-option').forEach(o => {
+      o.classList.remove('selected', 'text-[#1e293b]');
+      o.classList.add('text-[#94a3b8]');
+    });
+    const allOption = facultyContainer.querySelector('.dropdown-option[data-value="all"]');
+    if (allOption) {
+      allOption.classList.add('selected', 'text-[#1e293b]');
+      allOption.classList.remove('text-[#94a3b8]');
+    }
+  }
+
+  loadFaculties();
+}
+
 function showLoading() {
   document.getElementById('loadingState').style.display = 'block';
   document.getElementById('facultiesContainer').style.display = 'none';
@@ -193,14 +452,4 @@ function hideLoading() {
   document.getElementById('facultiesContainer').style.display = 'grid';
 }
 
-function attachEventListeners() {
-  document.getElementById('dateFilter').addEventListener('change', (e) => {
-    filters.date = e.target.value;
-    loadFaculties();
-  });
-  
-  document.getElementById('facultyFilter').addEventListener('change', (e) => {
-    filters.facultyId = e.target.value;
-    loadFaculties();
-  });
-}
+document.getElementById('clearFilters')?.addEventListener('click', clearFilters);

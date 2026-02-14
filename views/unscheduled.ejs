@@ -1,14 +1,8 @@
 <%- include('partials/header', { active: 'unscheduled' }) %>
-   
-    
+
  <div class="p-[32px]">
-      <div class="filters-container">
-        <div class="filter-grid" style="grid-template-columns: 1fr;">
-          <div class="filter-item">
-            <label>📅 DATE</label>
-            <input type="date" id="dateFilter" class="filter-input">
-          </div>
-        </div>
+      <div class="flex flex-wrap items-end gap-[4px] py-[8px] px-[16px] bg-[#ffffff] border border-[#e2e8f0] rounded-[12px] mb-[16px]">
+        <div class="min-w-[100px] flex flex-col gap-[2px] shrink basis-auto grow-0" id="filterDate"></div>
       </div>
 
       <!-- Tabs -->
@@ -24,23 +18,16 @@
         </button>
       </div>
 
-      <!-- Tab Contents -->
       <div class="tab-content active" id="classesTab">
-        <div id="classesContainer" class="unscheduled-list">
-          <!-- Classes will be loaded here -->
-        </div>
+        <div id="classesContainer" class="unscheduled-list"></div>
       </div>
 
       <div class="tab-content" id="facultiesTab">
-        <div id="facultiesContainer" class="unscheduled-list">
-          <!-- Faculties will be loaded here -->
-        </div>
+        <div id="facultiesContainer" class="unscheduled-list"></div>
       </div>
 
       <div class="tab-content" id="roomsTab">
-        <div id="roomsContainer" class="unscheduled-list">
-          <!-- Rooms will be loaded here -->
-        </div>
+        <div id="roomsContainer" class="unscheduled-list"></div>
       </div>
 
       <div id="loadingState" class="loading-state" style="display: none;">
@@ -55,7 +42,7 @@
       </div>
 
 </div>
-      
+
     </div>
   </div>
 

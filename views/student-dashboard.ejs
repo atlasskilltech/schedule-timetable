@@ -3,46 +3,12 @@
 <div class="p-[32px]">
 
   <!-- Filters -->
-  <div class="filters-container">
-    <div class="filter-grid" style="grid-template-columns: repeat(4, 1fr);">
-      <div class="filter-item">
-        <label>🏫 SCHOOL</label>
-        <select id="fSchool" class="filter-select" onchange="onFilterChange()">
-          <option value="">All Schools</option>
-        </select>
-      </div>
-      <div class="filter-item">
-        <label>🎓 DEGREE</label>
-        <select id="fDegree" class="filter-select" onchange="onFilterChange()">
-          <option value="">All Degrees</option>
-        </select>
-      </div>
-      <div class="filter-item">
-        <label>📚 PROGRAM</label>
-        <select id="fProgram" class="filter-select" onchange="onFilterChange()">
-          <option value="">All Programs</option>
-        </select>
-      </div>
-      <div class="filter-item">
-        <label>📅 GRADUATION YEAR</label>
-        <div style="position:relative">
-          <button onclick="toggleGrad()" id="gradBtn" class="filter-select" type="button"
-            style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;text-align:left;height:38px">
-            <span id="gradLabel" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">All Years</span>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5" style="flex-shrink:0;margin-left:4px"><path d="m6 9 6 6 6-6"/></svg>
-          </button>
-          <div id="gradDD" style="display:none;position:absolute;z-index:50;margin-top:4px;width:100%;background:#fff;border:1px solid var(--border-color);border-radius:8px;box-shadow:var(--shadow-lg)">
-            <div style="max-height:200px;overflow-y:auto;padding:8px" id="gradOpts"></div>
-            <div style="border-top:1px solid var(--border-light);padding:8px;display:flex;gap:8px">
-              <button onclick="selAllGrad()" style="flex:1;font-size:11px;color:var(--primary-color);font-weight:600;background:none;border:none;cursor:pointer;padding:4px">All</button>
-              <button onclick="clrGrad()" style="flex:1;font-size:11px;color:var(--text-tertiary);font-weight:600;background:none;border:none;cursor:pointer;padding:4px">Clear</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <button class="bg-slate-100 text-slate-800 border border-slate-200 inline-flex items-center gap-2 px-4 py-2 rounded-lg
-      text-[0.85rem] font-medium cursor-pointer transition-all duration-[150ms] ease-in-out h-fit whitespace-nowrap" id="clearFilters" onclick="resetFilters()">Clear</button>
+  <div class="flex flex-wrap items-end gap-[4px] py-[8px] px-[16px] bg-[#ffffff] border border-[#e2e8f0] rounded-[12px] mb-[16px]">
+    <div class="min-w-[100px] flex flex-col gap-[2px] shrink basis-auto grow-0" id="filterSchool"></div>
+    <div class="min-w-[100px] flex flex-col gap-[2px] shrink basis-auto grow-0" id="filterDegree"></div>
+    <div class="min-w-[100px] flex flex-col gap-[2px] shrink basis-auto grow-0" id="filterProgram"></div>
+    <div class="min-w-[100px] flex flex-col gap-[2px] shrink basis-auto grow-0" id="filterGradYear"></div>
+    <button class="bg-slate-100 text-slate-800 border border-slate-200 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-[0.85rem] font-medium cursor-pointer transition-all duration-[150ms] ease-in-out h-fit whitespace-nowrap" id="clearFilters">Clear</button>
   </div>
 
   <!-- Stats Bar -->
@@ -99,19 +65,64 @@
 <script>
 const COLORS = ['#16A085','#3b82f6','#8b5cf6','#f59e0b','#ec4899','#06b6d4'];
 let S = { level:'schools', curSchool:null, curProg:null, curCohort:null };
+let fSchool = 'all', fDegree = 'all', fProgram = 'all', fGradYears = [];
+
+// ─── Multi-select dropdown toggle ───────────────────────────
+function toggleMultiSelect(displayEl) {
+  const container = displayEl.parentElement;
+  const wasOpen = container.classList.contains('open');
+  document.querySelectorAll('.multi-select.open').forEach(ms => ms.classList.remove('open'));
+  if (!wasOpen) container.classList.add('open');
+}
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.multi-select')) {
+    document.querySelectorAll('.multi-select.open').forEach(ms => ms.classList.remove('open'));
+  }
+});
+
+function buildSelectDropdownHTML(label, placeholder, items, idPrefix) {
+  let html = `
+    <label class="flex items-center gap-[4px] text-[0.7rem] font-[600] text-[#94a3b8] uppercase tracking-[0.05em]">${label}</label>
+    <div class="relative min-w-[120px] multi-select group">
+      <div class="flex items-center justify-between py-[6px] px-[10px] bg-[#ffffff] border border-[#e2e8f0] rounded-[8px] cursor-pointer text-[0.85rem] min-h-[32px] gap-[4px] transition-all duration-[150ms] ease-in-out text-[#64748b] hover:border-[#10b981] group-[.open]:border-[#10b981] group-[.open]:ring-2 group-[.open]:ring-[rgba(16,185,129,0.1)]" onclick="toggleMultiSelect(this)">
+        <span class="text-[#64748b] whitespace-nowrap overflow-hidden text-ellipsis" id="${idPrefix}HeaderText">${placeholder}</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[14px] h-[14px] shrink-0 transition-transform duration-[150ms] ease-in-out text-[#94a3b8] group-[.open]:rotate-180"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+      <div class="absolute top-[calc(100%+4px)] left-0 right-0 bg-[#ffffff] border border-[#e2e8f0] rounded-[8px] shadow-[0_10px_15px_-3px_rgb(0_0_0_/_0.1),_0_4px_6px_-4px_rgb(0_0_0_/_0.1)] z-[1] max-h-[250px] overflow-y-auto hidden group-[.open]:block">`;
+  html += `<div class="dropdown-option selected py-[8px] px-[12px] cursor-pointer text-[0.7rem] font-[600] text-[#1e293b] uppercase tracking-[0.05em] hover:bg-[#f1f5f9] transition-colors duration-[150ms] ease-in-out" data-value="all">${placeholder}</div>`;
+  items.forEach(item => {
+    html += `<div class="dropdown-option py-[8px] px-[12px] cursor-pointer text-[0.7rem] font-[600] text-[#94a3b8] uppercase tracking-[0.05em] hover:bg-[#f1f5f9] transition-colors duration-[150ms] ease-in-out" data-value="${item.value}">${item.label}</div>`;
+  });
+  html += `</div></div>`;
+  return html;
+}
+
+function attachDropdownClick(container, filterKey, placeholder, callback) {
+  container.addEventListener('click', (e) => {
+    const option = e.target.closest('.dropdown-option');
+    if (!option) return;
+    const value = option.dataset.value;
+    container.querySelectorAll('.dropdown-option').forEach(o => {
+      o.classList.remove('selected', 'text-[#1e293b]');
+      o.classList.add('text-[#94a3b8]');
+    });
+    option.classList.add('selected');
+    option.classList.remove('text-[#94a3b8]');
+    option.classList.add('text-[#1e293b]');
+    document.getElementById(`${filterKey}HeaderText`).textContent = value === 'all' ? placeholder : option.textContent.trim();
+    container.querySelector('.multi-select')?.classList.remove('open');
+    if (callback) callback(value);
+  });
+}
 
 function bq() {
   const p = new URLSearchParams();
-  const sc = document.getElementById('fSchool').value;
-  const dg = document.getElementById('fDegree').value;
-  const pr = document.getElementById('fProgram').value;
   const ay = document.getElementById('fAcYear').value;
   if (ay) p.set('academic_year_id', ay);
-  if (sc) p.set('school_id', sc);
-  if (dg) p.set('degree_id', dg);
-  if (pr) p.set('program_abbr_id', pr);
-  const g = [...document.querySelectorAll('.gc:checked')].map(c => c.value);
-  if (g.length) p.set('graduation_year_ids', g.join(','));
+  if (fSchool !== 'all') p.set('school_id', fSchool);
+  if (fDegree !== 'all') p.set('degree_id', fDegree);
+  if (fProgram !== 'all') p.set('program_abbr_id', fProgram);
+  if (fGradYears.length) p.set('graduation_year_ids', fGradYears.join(','));
   return p.toString();
 }
 
@@ -132,16 +143,35 @@ async function init() {
   ]);
   if (ac.length) document.getElementById('fAcYear').value = ac[ac.length - 1].academic_year_id;
 
-  document.getElementById('gradOpts').innerHTML = gr.map(y =>
-    '<label style="display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--text-secondary);font-weight:500" onmouseover="this.style.background=\'var(--bg-secondary)\'" onmouseout="this.style.background=\'transparent\'">' +
-    '<input type="checkbox" value="' + y.graduation_year_id + '" class="gc" style="width:16px;height:16px;accent-color:var(--primary-color)" onchange="onGradChg()">' +
-    y.graduation_year_name + '</label>'
-  ).join('');
-  selAllGrad();
+  // Store all grad years as selected by default
+  fGradYears = gr.map(y => String(y.graduation_year_id));
 
-  document.getElementById('fSchool').innerHTML = '<option value="">All Schools</option>' + sc.map(s => '<option value="' + s.school_id + '">' + s.school_name + '</option>').join('');
-  document.getElementById('fDegree').innerHTML = '<option value="">All Degrees</option>' + dg.map(d => '<option value="' + d.certification_id + '">' + d.certification_name + (d.certification_short_name ? ' (' + d.certification_short_name + ')' : '') + '</option>').join('');
-  document.getElementById('fProgram').innerHTML = '<option value="">All Programs</option>' + pr.map(p => '<option value="' + p.id + '">' + p.abbrivation + '</option>').join('');
+  // Build school dropdown
+  const schoolEl = document.getElementById('filterSchool');
+  schoolEl.innerHTML = buildSelectDropdownHTML('SCHOOL', 'All Schools', sc.map(s => ({ value: s.school_id, label: s.school_name })), 'school');
+  attachDropdownClick(schoolEl, 'school', 'All Schools', v => { fSchool = v; onFilterChange(); });
+
+  // Build degree dropdown
+  const degreeEl = document.getElementById('filterDegree');
+  degreeEl.innerHTML = buildSelectDropdownHTML('DEGREE', 'All Degrees', dg.map(d => ({ value: d.certification_id, label: d.certification_name + (d.certification_short_name ? ' (' + d.certification_short_name + ')' : '') })), 'degree');
+  attachDropdownClick(degreeEl, 'degree', 'All Degrees', v => { fDegree = v; onFilterChange(); });
+
+  // Build program dropdown
+  const progEl = document.getElementById('filterProgram');
+  progEl.innerHTML = buildSelectDropdownHTML('PROGRAM', 'All Programs', pr.map(p => ({ value: p.id, label: p.abbrivation })), 'program');
+  attachDropdownClick(progEl, 'program', 'All Programs', v => { fProgram = v; onFilterChange(); });
+
+  // Build graduation year dropdown
+  const gradEl = document.getElementById('filterGradYear');
+  gradEl.innerHTML = buildSelectDropdownHTML('GRAD YEAR', 'All Years', gr.map(y => ({ value: y.graduation_year_id, label: y.graduation_year_name })), 'gradYear');
+  attachDropdownClick(gradEl, 'gradYear', 'All Years', v => {
+    if (v === 'all') {
+      fGradYears = gr.map(y => String(y.graduation_year_id));
+    } else {
+      fGradYears = [String(v)];
+    }
+    onFilterChange();
+  });
 
   document.getElementById('totalSchools').textContent = sc.length;
   document.getElementById('totalPrograms').textContent = pr.length;
@@ -150,29 +180,23 @@ async function init() {
   loadSchools();
 }
 
-function toggleGrad() {
-  const d = document.getElementById('gradDD');
-  d.style.display = d.style.display === 'none' ? 'block' : 'none';
-}
-document.addEventListener('click', e => {
-  if (!e.target.closest('#gradBtn') && !e.target.closest('#gradDD'))
-    document.getElementById('gradDD').style.display = 'none';
-});
-function selAllGrad() { document.querySelectorAll('.gc').forEach(c => c.checked = true); onGradChg(); }
-function clrGrad() { document.querySelectorAll('.gc').forEach(c => c.checked = false); onGradChg(); }
-function onGradChg() {
-  const ck = [...document.querySelectorAll('.gc:checked')], t = document.querySelectorAll('.gc').length;
-  document.getElementById('gradLabel').textContent = ck.length === 0 ? 'None' : ck.length === t ? 'All Years' : ck.length + ' Selected';
-  onFilterChange();
-}
 function onFilterChange() { showLevel('schools'); loadSummary(); loadSchools(); }
-function resetFilters() {
-  selAllGrad();
-  document.getElementById('fSchool').value = '';
-  document.getElementById('fDegree').value = '';
-  document.getElementById('fProgram').value = '';
+
+document.getElementById('clearFilters').addEventListener('click', function() {
+  fSchool = 'all'; fDegree = 'all'; fProgram = 'all';
+  ['school', 'degree', 'program', 'gradYear'].forEach(key => {
+    const ht = document.getElementById(key + 'HeaderText');
+    if (ht) ht.textContent = key === 'school' ? 'All Schools' : key === 'degree' ? 'All Degrees' : key === 'program' ? 'All Programs' : 'All Years';
+    const cId = key === 'school' ? 'filterSchool' : key === 'degree' ? 'filterDegree' : key === 'program' ? 'filterProgram' : 'filterGradYear';
+    const c = document.getElementById(cId);
+    if (c) {
+      c.querySelectorAll('.dropdown-option').forEach(o => { o.classList.remove('selected', 'text-[#1e293b]'); o.classList.add('text-[#94a3b8]'); });
+      const allOpt = c.querySelector('.dropdown-option[data-value="all"]');
+      if (allOpt) { allOpt.classList.add('selected', 'text-[#1e293b]'); allOpt.classList.remove('text-[#94a3b8]'); }
+    }
+  });
   onFilterChange();
-}
+});
 
 async function loadSummary() {
   try {

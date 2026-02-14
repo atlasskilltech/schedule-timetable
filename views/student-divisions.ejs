@@ -3,35 +3,12 @@
 <div class="p-[32px]">
 
   <!-- Filters -->
-  <div class="filters-container">
-    <div class="filter-grid" style="grid-template-columns: repeat(4, 1fr);">
-      <div class="filter-item">
-        <label>🏫 SCHOOL</label>
-        <select id="fSch" class="filter-select" onchange="ldPr()">
-          <option value="">Select School</option>
-        </select>
-      </div>
-      <div class="filter-item">
-        <label>📚 PROGRAM</label>
-        <select id="fPr" class="filter-select" disabled onchange="ldCo()">
-          <option value="">Select Program</option>
-        </select>
-      </div>
-      <div class="filter-item">
-        <label>🎓 COHORT</label>
-        <select id="fCo" class="filter-select" disabled onchange="ldDv()">
-          <option value="">Select Cohort</option>
-        </select>
-      </div>
-      <div class="filter-item">
-        <label>📋 DIVISION</label>
-        <select id="fDv" class="filter-select" disabled onchange="goDv()">
-          <option value="">Select Division</option>
-        </select>
-      </div>
-    </div>
-    <button class="bg-slate-100 text-slate-800 border border-slate-200 inline-flex items-center gap-2 px-4 py-2 rounded-lg
-      text-[0.85rem] font-medium cursor-pointer transition-all duration-[150ms] ease-in-out h-fit whitespace-nowrap" onclick="location.reload()">Reset</button>
+  <div class="flex flex-wrap items-end gap-[4px] py-[8px] px-[16px] bg-[#ffffff] border border-[#e2e8f0] rounded-[12px] mb-[16px]">
+    <div class="min-w-[100px] flex flex-col gap-[2px] shrink basis-auto grow-0" id="filterSchool"></div>
+    <div class="min-w-[100px] flex flex-col gap-[2px] shrink basis-auto grow-0" id="filterProgram"></div>
+    <div class="min-w-[100px] flex flex-col gap-[2px] shrink basis-auto grow-0" id="filterCohort"></div>
+    <div class="min-w-[100px] flex flex-col gap-[2px] shrink basis-auto grow-0" id="filterDivision"></div>
+    <button class="bg-slate-100 text-slate-800 border border-slate-200 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-[0.85rem] font-medium cursor-pointer transition-all duration-[150ms] ease-in-out h-fit whitespace-nowrap" onclick="location.reload()">Reset</button>
   </div>
 
   <input type="hidden" id="fAY" value="">
@@ -57,6 +34,56 @@
 <script>
 const COLORS = ['#16A085','#3b82f6','#8b5cf6','#f59e0b','#ec4899','#06b6d4'];
 
+// ─── Multi-select dropdown toggle ───────────────────────────
+function toggleMultiSelect(displayEl) {
+  const container = displayEl.parentElement;
+  const wasOpen = container.classList.contains('open');
+  document.querySelectorAll('.multi-select.open').forEach(ms => ms.classList.remove('open'));
+  if (!wasOpen) container.classList.add('open');
+}
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.multi-select')) {
+    document.querySelectorAll('.multi-select.open').forEach(ms => ms.classList.remove('open'));
+  }
+});
+
+function buildSelectDropdownHTML(label, placeholder, items, idPrefix) {
+  let html = `
+    <label class="flex items-center gap-[4px] text-[0.7rem] font-[600] text-[#94a3b8] uppercase tracking-[0.05em]">${label}</label>
+    <div class="relative min-w-[120px] multi-select group">
+      <div class="flex items-center justify-between py-[6px] px-[10px] bg-[#ffffff] border border-[#e2e8f0] rounded-[8px] cursor-pointer text-[0.85rem] min-h-[32px] gap-[4px] transition-all duration-[150ms] ease-in-out text-[#64748b] hover:border-[#10b981] group-[.open]:border-[#10b981] group-[.open]:ring-2 group-[.open]:ring-[rgba(16,185,129,0.1)]" onclick="toggleMultiSelect(this)">
+        <span class="text-[#64748b] whitespace-nowrap overflow-hidden text-ellipsis" id="${idPrefix}HeaderText">${placeholder}</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[14px] h-[14px] shrink-0 transition-transform duration-[150ms] ease-in-out text-[#94a3b8] group-[.open]:rotate-180"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+      <div class="absolute top-[calc(100%+4px)] left-0 right-0 bg-[#ffffff] border border-[#e2e8f0] rounded-[8px] shadow-[0_10px_15px_-3px_rgb(0_0_0_/_0.1),_0_4px_6px_-4px_rgb(0_0_0_/_0.1)] z-[1] max-h-[250px] overflow-y-auto hidden group-[.open]:block">`;
+  html += `<div class="dropdown-option selected py-[8px] px-[12px] cursor-pointer text-[0.7rem] font-[600] text-[#1e293b] uppercase tracking-[0.05em] hover:bg-[#f1f5f9] transition-colors duration-[150ms] ease-in-out" data-value="">${placeholder}</div>`;
+  items.forEach(item => {
+    html += `<div class="dropdown-option py-[8px] px-[12px] cursor-pointer text-[0.7rem] font-[600] text-[#94a3b8] uppercase tracking-[0.05em] hover:bg-[#f1f5f9] transition-colors duration-[150ms] ease-in-out" data-value="${item.value}">${item.label}</div>`;
+  });
+  html += `</div></div>`;
+  return html;
+}
+
+function attachCascadeClick(container, idPrefix, placeholder, callback) {
+  container.addEventListener('click', (e) => {
+    const option = e.target.closest('.dropdown-option');
+    if (!option) return;
+    const value = option.dataset.value;
+    container.querySelectorAll('.dropdown-option').forEach(o => {
+      o.classList.remove('selected', 'text-[#1e293b]');
+      o.classList.add('text-[#94a3b8]');
+    });
+    option.classList.add('selected');
+    option.classList.remove('text-[#94a3b8]');
+    option.classList.add('text-[#1e293b]');
+    document.getElementById(idPrefix + 'HeaderText').textContent = value === '' ? placeholder : option.textContent.trim();
+    container.querySelector('.multi-select')?.classList.remove('open');
+    if (callback) callback(value);
+  });
+}
+
+let selSchool = '', selProg = '', selCohort = '';
+
 async function af(u) {
   const ay = document.getElementById('fAY').value;
   const s = u.includes('?') ? '&' : '?';
@@ -66,19 +93,34 @@ async function af(u) {
 async function init() {
   const [ac, sc] = await Promise.all([af('filters/academic-years'), af('filters/schools')]);
   if (ac.length) document.getElementById('fAY').value = ac[ac.length - 1].academic_year_id;
-  document.getElementById('fSch').innerHTML = '<option value="">Select School</option>' +
-    sc.map(s => '<option value="' + s.school_id + '">' + s.school_name + '</option>').join('');
+
+  // Build school dropdown
+  const schoolEl = document.getElementById('filterSchool');
+  schoolEl.innerHTML = buildSelectDropdownHTML('SCHOOL', 'Select School', sc.map(s => ({ value: s.school_id, label: s.school_name })), 'school');
+  attachCascadeClick(schoolEl, 'school', 'Select School', v => { selSchool = v; ldPr(); });
+
+  // Init empty cascading dropdowns
+  resetProg();
 }
 
-function rst(f) {
-  if (f === 'prog') {
-    document.getElementById('fPr').innerHTML = '<option value="">Select Program</option>';
-    document.getElementById('fPr').disabled = true;
-  }
-  document.getElementById('fCo').innerHTML = '<option value="">Select Cohort</option>';
-  document.getElementById('fCo').disabled = true;
-  document.getElementById('fDv').innerHTML = '<option value="">Select Division</option>';
-  document.getElementById('fDv').disabled = true;
+function resetProg() {
+  const progEl = document.getElementById('filterProgram');
+  progEl.innerHTML = buildSelectDropdownHTML('PROGRAM', 'Select Program', [], 'program');
+  attachCascadeClick(progEl, 'program', 'Select Program', v => { selProg = v; ldCo(); });
+  resetCohort();
+}
+
+function resetCohort() {
+  const cohortEl = document.getElementById('filterCohort');
+  cohortEl.innerHTML = buildSelectDropdownHTML('COHORT', 'Select Cohort', [], 'cohort');
+  attachCascadeClick(cohortEl, 'cohort', 'Select Cohort', v => { selCohort = v; ldDv(); });
+  resetDiv();
+}
+
+function resetDiv() {
+  const divEl = document.getElementById('filterDivision');
+  divEl.innerHTML = buildSelectDropdownHTML('DIVISION', 'Select Division', [], 'division');
+  attachCascadeClick(divEl, 'division', 'Select Division', v => { if (v) goDv(v); });
   document.getElementById('divCards').style.display = 'none';
   document.getElementById('emptyState').style.display = 'block';
   document.getElementById('emptyState').querySelector('h3').textContent = 'No division selected';
@@ -86,42 +128,38 @@ function rst(f) {
 }
 
 async function ldPr() {
-  rst('prog');
-  const sid = document.getElementById('fSch').value;
-  if (!sid) return;
-  const pr = await af('filters/programs/' + sid);
-  const p = document.getElementById('fPr');
-  p.innerHTML = '<option value="">Select Program</option>' + pr.map(x => '<option value="' + x.program_id + '">' + x.program_name + '</option>').join('');
-  p.disabled = false;
+  resetProg();
+  if (!selSchool) return;
+  const pr = await af('filters/programs/' + selSchool);
+  const progEl = document.getElementById('filterProgram');
+  progEl.innerHTML = buildSelectDropdownHTML('PROGRAM', 'Select Program', pr.map(x => ({ value: x.program_id, label: x.program_name })), 'program');
+  attachCascadeClick(progEl, 'program', 'Select Program', v => { selProg = v; ldCo(); });
 }
 
 async function ldCo() {
-  rst('cohort');
-  const sid = document.getElementById('fSch').value, pid = document.getElementById('fPr').value;
-  if (!pid) return;
-  const co = await af('filters/cohorts/' + sid + '/' + pid);
-  const c = document.getElementById('fCo');
-  c.innerHTML = '<option value="">Select Cohort</option>' + co.map(x => '<option value="' + x.cluster_id + '">' + x.cluster_name + '</option>').join('');
-  c.disabled = false;
+  resetCohort();
+  if (!selProg) return;
+  const co = await af('filters/cohorts/' + selSchool + '/' + selProg);
+  const cohortEl = document.getElementById('filterCohort');
+  cohortEl.innerHTML = buildSelectDropdownHTML('COHORT', 'Select Cohort', co.map(x => ({ value: x.cluster_id, label: x.cluster_name })), 'cohort');
+  attachCascadeClick(cohortEl, 'cohort', 'Select Cohort', v => { selCohort = v; ldDv(); });
 }
 
 async function ldDv() {
-  document.getElementById('fDv').innerHTML = '<option value="">Select Division</option>';
-  document.getElementById('fDv').disabled = true;
-  const cid = document.getElementById('fCo').value;
-  if (!cid) { rst('cohort'); return; }
+  resetDiv();
+  if (!selCohort) return;
 
   document.getElementById('emptyState').style.display = 'none';
   document.getElementById('loadingState').style.display = 'block';
 
-  const cls = await af('classes/' + cid);
+  const cls = await af('classes/' + selCohort);
 
   document.getElementById('loadingState').style.display = 'none';
 
-  // Populate dropdown
-  document.getElementById('fDv').innerHTML = '<option value="">Select Division</option>' +
-    cls.map(x => '<option value="' + x.st_class_id + '">' + x.st_class_name + ' (' + x.cnt + ')</option>').join('');
-  document.getElementById('fDv').disabled = false;
+  // Build division dropdown
+  const divEl = document.getElementById('filterDivision');
+  divEl.innerHTML = buildSelectDropdownHTML('DIVISION', 'Select Division', cls.map(x => ({ value: x.st_class_id, label: x.st_class_name + ' (' + x.cnt + ')' })), 'division');
+  attachCascadeClick(divEl, 'division', 'Select Division', v => { if (v) goDv(v); });
 
   if (!cls.length) {
     document.getElementById('emptyState').style.display = 'block';
@@ -133,9 +171,12 @@ async function ldDv() {
   // Show cards
   const g = document.getElementById('divCards');
   g.style.display = 'grid';
-  var sc = document.getElementById('fSch').selectedOptions[0]?.text || '';
-  var pr = document.getElementById('fPr').selectedOptions[0]?.text || '';
-  var co = document.getElementById('fCo').selectedOptions[0]?.text || '';
+
+  // Get selected names from dropdowns
+  var scName = document.getElementById('schoolHeaderText')?.textContent?.trim() || '';
+  var prName = document.getElementById('programHeaderText')?.textContent?.trim() || '';
+  var coName = document.getElementById('cohortHeaderText')?.textContent?.trim() || '';
+
   g.innerHTML = cls.map((cl, i) => {
     const col = COLORS[i % COLORS.length];
     return '<div class="class-card" onclick="goSt(' + cl.st_class_id + ',\'' + encodeURIComponent(cl.st_class_name) + '\')" style="cursor:pointer">' +
@@ -145,9 +186,9 @@ async function ldDv() {
       '</div>' +
       '<div class="card-info">' +
         '<div class="card-info-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>' + cl.cnt.toLocaleString() + ' Students</span></div>' +
-        '<div class="card-info-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16"/><path d="M3 21h18"/></svg><span>' + sc + '</span></div>' +
-        '<div class="card-info-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg><span>' + pr + '</span></div>' +
-        '<div class="card-info-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span>' + co + '</span></div>' +
+        '<div class="card-info-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16"/><path d="M3 21h18"/></svg><span>' + scName + '</span></div>' +
+        '<div class="card-info-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg><span>' + prName + '</span></div>' +
+        '<div class="card-info-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span>' + coName + '</span></div>' +
         '<div class="card-info-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 5 7 7-7 7"/></svg><span style="color:var(--primary-color);font-weight:500">View students</span></div>' +
       '</div>' +
     '</div>';
@@ -156,17 +197,21 @@ async function ldDv() {
 
 function goSt(cid, cn) {
   const ay = document.getElementById('fAY').value;
-  const sc = document.getElementById('fSch').selectedOptions[0]?.text || '';
-  const pr = document.getElementById('fPr').selectedOptions[0]?.text || '';
-  const co = document.getElementById('fCo').selectedOptions[0]?.text || '';
+  const sc = document.getElementById('schoolHeaderText')?.textContent?.trim() || '';
+  const pr = document.getElementById('programHeaderText')?.textContent?.trim() || '';
+  const co = document.getElementById('cohortHeaderText')?.textContent?.trim() || '';
   window.location.href = '/student-count/students?class_id=' + cid + '&class_name=' + cn +
     '&school=' + encodeURIComponent(sc) + '&program=' + encodeURIComponent(pr) +
     '&cohort=' + encodeURIComponent(co) + '&academic_year_id=' + ay;
 }
 
-function goDv() {
-  const v = document.getElementById('fDv').value;
-  if (v) goSt(v, encodeURIComponent(document.getElementById('fDv').selectedOptions[0]?.text || ''));
+function goDv(v) {
+  if (v) {
+    const divEl = document.getElementById('filterDivision');
+    const selected = divEl.querySelector('.dropdown-option.selected');
+    const cn = selected ? encodeURIComponent(selected.textContent.trim()) : '';
+    goSt(v, cn);
+  }
 }
 
 init();
