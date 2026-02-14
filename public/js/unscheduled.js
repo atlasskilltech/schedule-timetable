@@ -83,7 +83,7 @@ function renderUnscheduled(data) {
 
 function renderClasses(classes) {
   const container = document.getElementById('classesContainer');
-  
+
   if (classes.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
@@ -94,30 +94,41 @@ function renderClasses(classes) {
     `;
     return;
   }
-  
+
+  const colors = ['#16A085','#3b82f6','#8b5cf6','#f59e0b','#ec4899','#06b6d4'];
   const html = `
-    <div class="unscheduled-items">
-      ${classes.map(cls => `
-        <div class="unscheduled-item">
-          <div class="unscheduled-icon">📚</div>
-          <div class="unscheduled-details">
-            <div class="unscheduled-name">${cls.class_name}</div>
-            <div class="unscheduled-meta">
-              🎓 ${cls.school_name} • Year ${cls.class_year || 'N/A'}
+    <div class="class-cards-grid">
+      ${classes.map((cls, i) => `
+        <div class="class-card">
+          <div class="card-subject">
+            <span class="subject-badge" style="background:${colors[i % colors.length]}">CLS</span>
+            <div class="subject-name">${cls.class_name}</div>
+          </div>
+          <div class="card-info">
+            <div class="card-info-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16"/><path d="M3 21h18"/></svg>
+              <span>${cls.school_name}</span>
             </div>
-            <div class="unscheduled-reason">${cls.reason}</div>
+            <div class="card-info-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <span>Year ${cls.class_year || 'N/A'}</span>
+            </div>
+            <div class="card-info-row" style="color:var(--warning-color, #f59e0b)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <span>${cls.reason}</span>
+            </div>
           </div>
         </div>
       `).join('')}
     </div>
   `;
-  
+
   container.innerHTML = html;
 }
 
 function renderFaculties(faculties) {
   const container = document.getElementById('facultiesContainer');
-  
+
   if (faculties.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
@@ -128,29 +139,37 @@ function renderFaculties(faculties) {
     `;
     return;
   }
-  
+
+  const colors = ['#16A085','#3b82f6','#8b5cf6','#f59e0b','#ec4899','#06b6d4'];
   const html = `
-    <div class="unscheduled-items">
-      ${faculties.map(faculty => `
-        <div class="unscheduled-item">
-          <div class="unscheduled-icon">👨‍🏫</div>
-          <div class="unscheduled-details">
-            <div class="unscheduled-name">
-              ${faculty.faculty_first_name} ${faculty.faculty_last_name}
+    <div class="class-cards-grid">
+      ${faculties.map((faculty, i) => `
+        <div class="class-card">
+          <div class="card-subject">
+            <span class="subject-badge" style="background:${colors[i % colors.length]}">FAC</span>
+            <div class="subject-name">${faculty.faculty_first_name} ${faculty.faculty_last_name}</div>
+          </div>
+          <div class="card-info">
+            <div class="card-info-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span>Faculty</span>
             </div>
-            <div class="unscheduled-reason">${faculty.reason}</div>
+            <div class="card-info-row" style="color:var(--warning-color, #f59e0b)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <span>${faculty.reason}</span>
+            </div>
           </div>
         </div>
       `).join('')}
     </div>
   `;
-  
+
   container.innerHTML = html;
 }
 
 function renderRooms(rooms) {
   const container = document.getElementById('roomsContainer');
-  
+
   if (rooms.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
@@ -161,24 +180,35 @@ function renderRooms(rooms) {
     `;
     return;
   }
-  
+
+  const colors = ['#16A085','#3b82f6','#8b5cf6','#f59e0b','#ec4899','#06b6d4'];
   const html = `
-    <div class="unscheduled-items">
-      ${rooms.map(room => `
-        <div class="unscheduled-item">
-          <div class="unscheduled-icon">🏢</div>
-          <div class="unscheduled-details">
-            <div class="unscheduled-name">${room.room_name}</div>
-            <div class="unscheduled-meta">
-              ${room.floor_building} • ${room.floor_name}
+    <div class="class-cards-grid">
+      ${rooms.map((room, i) => `
+        <div class="class-card">
+          <div class="card-subject">
+            <span class="subject-badge" style="background:${colors[i % colors.length]}">RM</span>
+            <div class="subject-name">${room.room_name}</div>
+          </div>
+          <div class="card-info">
+            <div class="card-info-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+              <span>${room.floor_building}</span>
             </div>
-            <div class="unscheduled-reason">${room.reason}</div>
+            <div class="card-info-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              <span>${room.floor_name}</span>
+            </div>
+            <div class="card-info-row" style="color:var(--warning-color, #f59e0b)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <span>${room.reason}</span>
+            </div>
           </div>
         </div>
       `).join('')}
     </div>
   `;
-  
+
   container.innerHTML = html;
 }
 

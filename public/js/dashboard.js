@@ -1088,20 +1088,19 @@ function renderTimetable(data) {
     if (classes.length === 0) return;
 
     html += `
-     
-        <div class="px-[24px] py-[16px] bg-[#f8fafc] border-b border-[#e2e8f0] flex items-center gap-[8px]">
-        <svg viewBox="0 0 24 24" fill="none" class="text-[#94a3b8]" stroke="currentColor" stroke-width="2" width="18" height="18">
-                    <rect x="3" y="4" width="18" height="18" rx="2"></rect>
-                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                    <line x1="8" y1="2" x2="8" y2="6"></line>
-                </svg>
-          <h3 class="text-[1rem] font-[600] text-[#1e293b] m-0">${dayName}</h3>
-          <span class="text-[0.85rem] text-[#64748b] font-[400]">(${classes.length} classes)</span>
+        <div class="day-header" style="padding:16px 24px;background:var(--bg-secondary);border-bottom:1px solid var(--border-light);display:flex;align-items:center;gap:8px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" style="color:var(--text-tertiary)">
+            <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <h3 style="font-size:1rem;font-weight:600;color:var(--text-primary);margin:0">${dayName}</h3>
+          <span class="day-count">(${classes.length} classes)</span>
         </div>
-        <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-[16px] p-[24px] bg-white">
+        <div class="class-cards-grid" style="padding:24px">
           ${classes.map((cls) => renderClassCard(cls)).join("")}
         </div>
-    
     `;
   });
 
@@ -1110,7 +1109,6 @@ function renderTimetable(data) {
 
 // Render individual class card
 function renderClassCard(cls) {
-    console.log("renderClassCard",cls.class_year);
   const schoolId = cls.school_id || "default";
   const schoolCode = cls.school_code || "";
   const facultyName =
@@ -1120,70 +1118,57 @@ function renderClassCard(cls) {
   const buildingInfo = cls.floor_building
     ? `${cls.floor_building} - ${cls.floor_name}`
     : "";
-
-    const years = cls.class_year || "";
+  const years = cls.class_year || "";
 
   return `
-    <div class="relative cursor-pointer bg-white border border-[#e2e8f0] rounded-[8px] p-[16px] transition-all duration-[150ms] ease-in-out hover:border-[#10b981] hover:shadow-[0_4px_6px_-1px_rgb(0_0_0_/_0.1),_0_2px_4px_-2px_rgb(0_0_0_/_0.1)] hover:-translate-y-[1px]" data-school="${schoolId}">
-      <div class="flex justify-between items-center mb-[8px] pb-[8px] border-b border-[#f1f5f9]">
-        <span class="flex items-center gap-[6px] text-[0.85rem] font-[500] text-[#64748b]">
-        <svg class="w-[14px] h-[14px] text-[#94a3b8]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <div class="class-card" data-school="${schoolId}">
+      <div class="card-time">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="10"></circle>
           <polyline points="12 6 12 12 16 14"></polyline>
         </svg>
-        ${cls.start_time} - ${cls.end_time}
-        </span>
-        <span class="text-[0.8rem] font-[600] bg-[#f1f5f9] px-[10px] py-[4px] rounded-[4px] text-[#1e293b] border border-[#e2e8f0]">101-B</span>
+        <span>${cls.start_time} - ${cls.end_time}</span>
+        <span class="card-time-value" style="margin-left:auto">${roomInfo}</span>
       </div>
-      
-      <div class="mb-[8px]">
-      <div class="inline-flex items-center gap-[4px] text-[0.75rem] font-[700] text-[#10b981] bg-[rgba(16,185,129,0.1)] px-[8px] py-[3px] rounded-[4px] mb-[6px] uppercase tracking-[0.02em]" data-school="${schoolId}">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[14px] h-[14px]">
-                        <rect x="3" y="3" width="18" height="18" rx="2"></rect>
-                        <path d="M7 7h10M7 12h10M7 17h6"></path>
-                    </svg>  ${schoolCode === "" ? "No Data": schoolCode}
-                    </div>
-       
-        <div class="text-[0.85rem] font-[500] text-[#64748b] leading-[1.4] line-clamp-2">${cls.subject_name || "N/A"}</div>
+
+      <div class="card-subject">
+        <span class="subject-badge" data-school="${schoolId}">${schoolCode || "N/A"}</span>
+        <div class="subject-name">${cls.subject_name || "N/A"}</div>
       </div>
-      
-      <div class="flex flex-col gap-[6px] text-[0.8rem] text-[#64748b] mt-[8px] pt-[8px] border-t border-[#f1f5f9]">
-        <div class="flex items-center gap-[6px]">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[14px] h-[14px] shrink-0 text-[#94a3b8]">
+
+      <div class="card-info">
+        <div class="card-info-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
             <circle cx="12" cy="7" r="4"></circle>
           </svg>
-          ${facultyName}
+          <span>${facultyName}</span>
         </div>
-        <div class="flex items-center gap-[6px]">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[14px] h-[14px] shrink-0 text-[#94a3b8]">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-            <circle cx="12" cy="7" r="4"></circle>
+        <div class="card-info-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
           </svg>
-         ${years || 0} Years
+          <span>${years || 0} Years</span>
         </div>
-        ${
-          cls.class_name
-            ? `
-        <div class="flex items-center gap-[6px]">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[14px] h-[14px] shrink-0 text-[#94a3b8]">
+        ${cls.class_name ? `
+        <div class="card-info-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
             <circle cx="9" cy="7" r="4"></circle>
             <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
             <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
           </svg>
-         ${cls.class_name}
+          <span>${cls.class_name}</span>
         </div>
-        `
-            : ""
-        }
-
-      
-        <div class="flex items-center gap-[6px]">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[14px] h-[14px] shrink-0 text-[#94a3b8]">
+        ` : ""}
+        <div class="card-info-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
           </svg>
-          <span>${roomInfo}${buildingInfo ? " • " + buildingInfo : ""}dddfaizan</span>
+          <span>${roomInfo}${buildingInfo ? " &bull; " + buildingInfo : ""}</span>
         </div>
       </div>
     </div>

@@ -189,46 +189,56 @@
         <h1 class="start-welcome-title text-[2rem] font-[700] text-[#1e293b] mb-[8px]">Welcome to ATLAS Tech</h1>
         <p class="start-welcome-sub text-[1rem] text-[#64748b] mb-[40px]">Select a section from the sidebar to get started</p>
 
-        <div class="start-cards grid grid-cols-3 gap-[16px] max-w-[540px] mx-auto">
-          <a href="https://timetable.atlasskilltech.app/" class="bg-white border border-[#e2e8f0] rounded-[12px] p-[24px] text-center hover:shadow-lg hover:border-[#10b981] transition-all duration-200 no-underline group">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[28px] h-[28px] mx-auto mb-[12px] text-[#64748b] group-hover:text-[#10b981] transition-colors">
-              <rect x="3" y="4" width="18" height="18" rx="2"/>
-              <line x1="16" y1="2" x2="16" y2="6"/>
-              <line x1="8" y1="2" x2="8" y2="6"/>
-              <line x1="3" y1="10" x2="21" y2="10"/>
-            </svg>
-            <div class="text-[0.9rem] font-[600] text-[#1e293b]">Timetable</div>
-            <div class="text-[0.7rem] text-[#94a3b8] mt-[4px]">View schedules</div>
+        <div class="start-cards class-cards-grid" style="max-width:540px;margin:0 auto">
+          <a href="https://timetable.atlasskilltech.app/" class="class-card" style="text-decoration:none;color:inherit">
+            <div class="card-subject">
+              <span class="subject-badge">TT</span>
+              <div class="subject-name">Timetable</div>
+            </div>
+            <div class="card-info">
+              <div class="card-info-row">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <span>View schedules</span>
+              </div>
+              <div class="card-info-row">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 5 7 7-7 7"/></svg>
+                <span style="color:var(--primary-color);font-weight:500">Open</span>
+              </div>
+            </div>
           </a>
 
-          <a href="https://students.atlasskilltech.app/" class="bg-white border border-[#e2e8f0] rounded-[12px] p-[24px] text-center hover:shadow-lg hover:border-[#10b981] transition-all duration-200 no-underline group">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                class="w-[28px] h-[28px] mx-auto mb-[12px] text-[#64748b] group-hover:text-[#10b981] transition-colors">
-              
-                <!-- Head Left -->
-                <rect x="3" y="3" width="7" height="5" rx="1"/>
-              
-                <!-- Head Right -->
-                <rect x="14" y="3" width="7" height="5" rx="1"/>
-              
-                <!-- Body Left -->
-                <rect x="3" y="10" width="7" height="11" rx="1"/>
-              
-                <!-- Body Right -->
-                <rect x="14" y="10" width="7" height="11" rx="1"/>
-              
-              </svg>
-            <div class="text-[0.9rem] font-[600] text-[#1e293b]">Students</div>
-            <div class="text-[0.7rem] text-[#94a3b8] mt-[4px]">Overview & stats</div>
+          <a href="https://students.atlasskilltech.app/" class="class-card" style="text-decoration:none;color:inherit">
+            <div class="card-subject">
+              <span class="subject-badge" style="background:#3b82f6">ST</span>
+              <div class="subject-name">Students</div>
+            </div>
+            <div class="card-info">
+              <div class="card-info-row">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <span>Overview & stats</span>
+              </div>
+              <div class="card-info-row">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 5 7 7-7 7"/></svg>
+                <span style="color:var(--primary-color);font-weight:500">Open</span>
+              </div>
+            </div>
           </a>
 
-          <a href="https://dashboard.atlasskilltech.app/infra/rooms" class="bg-white border border-[#e2e8f0] rounded-[12px] p-[24px] text-center hover:shadow-lg hover:border-[#10b981] transition-all duration-200 no-underline group">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[28px] h-[28px] mx-auto mb-[12px] text-[#64748b] group-hover:text-[#10b981] transition-colors">
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-              <polyline points="9,22 9,12 15,12 15,22"/>
-            </svg>
-            <div class="text-[0.9rem] font-[600] text-[#1e293b]">Rooms</div>
-            <div class="text-[0.7rem] text-[#94a3b8] mt-[4px]">Classrooms & more</div>
+          <a href="https://dashboard.atlasskilltech.app/infra/rooms" class="class-card" style="text-decoration:none;color:inherit">
+            <div class="card-subject">
+              <span class="subject-badge" style="background:#8b5cf6">RM</span>
+              <div class="subject-name">Rooms</div>
+            </div>
+            <div class="card-info">
+              <div class="card-info-row">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+                <span>Classrooms & more</span>
+              </div>
+              <div class="card-info-row">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 5 7 7-7 7"/></svg>
+                <span style="color:var(--primary-color);font-weight:500">Open</span>
+              </div>
+            </div>
           </a>
         </div>
       </div>
