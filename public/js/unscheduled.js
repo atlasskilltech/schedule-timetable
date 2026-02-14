@@ -10,20 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupTabs();
 });
 
-// ─── Multi-select dropdown toggle ───────────────────────────
-function toggleMultiSelect(displayEl) {
-  const container = displayEl.parentElement;
-  const wasOpen = container.classList.contains('open');
-  document.querySelectorAll('.multi-select.open').forEach(ms => ms.classList.remove('open'));
-  if (!wasOpen) container.classList.add('open');
-}
-
-// Close dropdowns when clicking outside
-document.addEventListener('click', (e) => {
-  if (!e.target.closest('.multi-select')) {
-    document.querySelectorAll('.multi-select.open').forEach(ms => ms.classList.remove('open'));
-  }
-});
+// ─── Dropdown toggle and search are in /js/common.js ───
 
 // ─── Date Picker ────────────────────────────────────────────
 function initDatePicker() {
