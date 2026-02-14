@@ -37,7 +37,7 @@
   <input type="hidden" id="fAY" value="">
 
   <!-- Division Cards -->
-  <div id="divCards" class="class-cards-grid" style="display:none"></div>
+  <div id="divCards" style="display:none;grid-template-columns:repeat(2,1fr);gap:16px"></div>
 
   <!-- Loading State -->
   <div id="loadingState" class="loading-state" style="display:none">
@@ -135,13 +135,13 @@ async function ldDv() {
   g.style.display = 'grid';
   g.innerHTML = cls.map((cl, i) => {
     const col = COLORS[i % COLORS.length];
-    return '<div class="class-card" onclick="goSt(' + cl.st_class_id + ',\'' + encodeURIComponent(cl.st_class_name) + '\')" style="border-left:3px solid ' + col + '">' +
-      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">' +
-        '<div class="subject-badge" style="background:' + col + '">' + (cl.st_class_code || 'D') + '</div>' +
-        '<span style="font-size:12px;font-weight:600;color:var(--text-secondary);background:var(--bg-tertiary);padding:4px 10px;border-radius:4px">' + cl.cnt.toLocaleString() + ' students</span>' +
+    return '<div onclick="goSt(' + cl.st_class_id + ',\'' + encodeURIComponent(cl.st_class_name) + '\')" style="background:#fff;border:1px solid var(--border-light);border-left:4px solid ' + col + ';border-radius:8px;padding:24px;cursor:pointer;transition:all .2s;box-shadow:var(--shadow-card)" onmouseover="this.style.boxShadow=\'var(--shadow-md)\';this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.boxShadow=\'var(--shadow-card)\';this.style.transform=\'none\'">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">' +
+        '<div style="width:40px;height:40px;border-radius:10px;background:' + col + ';display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700">' + (cl.st_class_code || 'D') + '</div>' +
+        '<span style="font-size:12px;font-weight:600;color:' + col + ';background:' + col + '15;border:1px solid ' + col + '30;padding:5px 14px;border-radius:20px">' + cl.cnt.toLocaleString() + ' students</span>' +
       '</div>' +
-      '<div class="subject-name" style="margin-bottom:6px">' + cl.st_class_name + '</div>' +
-      '<div class="card-info-row" style="font-size:12px;color:var(--text-tertiary)">View students <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></div>' +
+      '<div style="font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:8px;line-height:1.4">' + cl.st_class_name + '</div>' +
+      '<div style="font-size:13px;color:var(--primary-color);font-weight:500;display:flex;align-items:center;gap:4px">View students <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></div>' +
     '</div>';
   }).join('');
 }
