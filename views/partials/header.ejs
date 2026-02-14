@@ -85,6 +85,39 @@
       </a>
     </div>
 
+    <!-- Student Count Section -->
+    <div class="mb-[24px]">
+      <h3 class="py-[8px] px-[24px] text-[0.7rem] uppercase tracking-[0.08em] text-[#94a3b8] font-[600]">STUDENT COUNT</h3>
+      <a href="/student-count" style="font-family: sans-serif;" class="flex items-center gap-[8px] py-[8px] px-[24px] text-[0.9rem] font-[500] cursor-pointer transition-all duration-[150ms] ease-in-out
+         border-none w-full text-left leading-normal text-[#94a3b8]
+         <%= active === 'student-dashboard' ? 'bg-[#10b981] text-white rounded-r-[8px] mr-[16px]' : 'hover:bg-[#334155] hover:text-[#e2e8f0]' %>">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[18px] h-[18px] shrink-0">
+          <path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+        </svg>
+        <span>Dashboard</span>
+      </a>
+      <a href="/student-count/search" style="font-family: sans-serif;" class="flex items-center gap-[8px] py-[8px] px-[24px] text-[0.9rem] font-[500] cursor-pointer transition-all duration-[150ms] ease-in-out
+         border-none w-full text-left leading-normal text-[#94a3b8]
+         <%= active === 'student-search' ? 'bg-[#10b981] text-white rounded-r-[8px] mr-[16px]' : 'hover:bg-[#334155] hover:text-[#e2e8f0]' %>">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[18px] h-[18px] shrink-0">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="m21 21-4.35-4.35"/>
+        </svg>
+        <span>Search Students</span>
+      </a>
+      <a href="/student-count/divisions" style="font-family: sans-serif;" class="flex items-center gap-[8px] py-[8px] px-[24px] text-[0.9rem] font-[500] cursor-pointer transition-all duration-[150ms] ease-in-out
+         border-none w-full text-left leading-normal text-[#94a3b8]
+         <%= active === 'student-divisions' ? 'bg-[#10b981] text-white rounded-r-[8px] mr-[16px]' : 'hover:bg-[#334155] hover:text-[#e2e8f0]' %>">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-[18px] h-[18px] shrink-0">
+          <rect x="3" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/>
+          <rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+        <span>By Division</span>
+      </a>
+    </div>
+
     <!-- Resources Section -->
     <div class="mb-[24px]">
       <h3 class="py-[8px] px-[24px] text-[0.7rem] uppercase tracking-[0.08em] text-[#94a3b8] font-[600]">RESOURCES</h3>

@@ -48,11 +48,15 @@ const dashboardRoutes = require('./routes/dashboard');
 const timetableRoutes = require('./routes/timetable');
 const resourceRoutes = require('./routes/resources');
 const infraRoutes = require('./routes/infra');
+const studentPageRoutes = require('./routes/studentPages');
+const studentApiRoutes = require('./routes/studentApi');
 
 app.use('/', ensureAuthenticated, dashboardRoutes);
 app.use('/timetable', ensureAuthenticated, timetableRoutes);
 app.use('/resources', ensureAuthenticated, resourceRoutes);
 app.use('/infra', ensureAuthenticated, infraRoutes);
+app.use('/student-count', ensureAuthenticated, studentPageRoutes);
+app.use('/api', ensureAuthenticated, studentApiRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
