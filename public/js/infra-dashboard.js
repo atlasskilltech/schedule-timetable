@@ -3,13 +3,14 @@ let allRooms = [];
 let filteredRooms = [];
 let filters = {
   date: new Date().toISOString().split('T')[0],
-  building: 'all',
-  floor: 'all',
-  class: 'all',
-  category: 'all',
-  school: 'all',
-  showAvailable: true,
-  showOccupied: true
+  program: [],
+  year: [],
+  section: [],
+  faculty: [],
+  room: [],
+  subject: [],
+  day: [],
+  time: []
 };
 
 // Day operating hours for occupancy rate calculation
@@ -17,167 +18,346 @@ const DAY_START_HOUR = 7;
 const DAY_END_HOUR   = 19;
 const DAY_TOTAL_HOURS = DAY_END_HOUR - DAY_START_HOUR;
 
-// ─── Initialize ─────────────────────────────────────────────
+// Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
-  initializeFilters();
   loadFilterOptions();
   loadData();
   attachEventListeners();
-  initializePalette();
-  initializeSidebar();
 });
 
-function initializeFilters() {
-  document.getElementById('dateFilter').value = filters.date;
-}
+// ─── Multi-select dropdown toggle ──────────────────────────
+function toggleMultiSelect(displayEl) {
+  const container = displayEl.parentElement;
+  const wasOpen = container.classList.contains('open');
 
-// ─── Sidebar toggle (mobile) ────────────────────────────────
-function initializeSidebar() {
-  const toggle = document.getElementById('sidebarToggle');
-  const sidebar = document.getElementById('sidebar');
-  const closeBtn = document.querySelector('[data-sidebar-toggle]');
-
-  // Create overlay element
-  const overlay = document.createElement('div');
-  overlay.className = 'sidebar-overlay';
-  document.body.appendChild(overlay);
-
-  toggle.addEventListener('click', () => {
-    sidebar.classList.toggle('open');
-    overlay.classList.toggle('active');
+  // Close all other dropdowns
+  document.querySelectorAll('.multi-select.open').forEach(ms => {
+    ms.classList.remove('open');
   });
 
-  if (closeBtn) {
-    closeBtn.addEventListener('click', () => {
-      sidebar.classList.remove('open');
-      overlay.classList.remove('active');
+  // Toggle this one
+  if (!wasOpen) {
+    container.classList.add('open');
+  }
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.multi-select')) {
+    document.querySelectorAll('.multi-select.open').forEach(ms => {
+      ms.classList.remove('open');
     });
   }
+});
 
-  overlay.addEventListener('click', () => {
-    sidebar.classList.remove('open');
-    overlay.classList.remove('active');
+// ─── Filter dropdown builder helper ────────────────────────
+function buildDropdownHTML(label, placeholder, items, inputClass, idPrefix) {
+  let html = `
+    <label class="flex items-center gap-[4px]
+      text-[0.7rem] font-[600]
+      text-[#94a3b8]
+      uppercase tracking-[0.05em]">
+      ${label}
+    </label>
+    <div class="relative min-w-[120px] multi-select group">
+      <div class="flex items-center justify-between
+        py-[6px] px-[10px]
+        bg-[#ffffff]
+        border border-[#e2e8f0]
+        rounded-[8px]
+        cursor-pointer
+        text-[0.85rem]
+        min-h-[32px]
+        gap-[4px]
+        transition-all duration-[150ms] ease-in-out text-[#64748b] hover:border-[#10b981] group-[.open]:border-[#10b981] group-[.open]:ring-2 group-[.open]:ring-[rgba(16,185,129,0.1)]"
+        onclick="toggleMultiSelect(this)">
+        <span class="text-[#64748b] whitespace-nowrap overflow-hidden text-ellipsis">
+          ${placeholder}
+        </span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          class="w-[14px] h-[14px] shrink-0 transition-transform duration-[150ms]
+          ease-in-out text-[#94a3b8] group-[.open]:rotate-180">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </div>
+      <div class="absolute
+        top-[calc(100%+4px)]
+        left-0 right-0
+        bg-[#ffffff]
+        border border-[#e2e8f0]
+        rounded-[8px]
+        shadow-[0_10px_15px_-3px_rgb(0_0_0_/_0.1),_0_4px_6px_-4px_rgb(0_0_0_/_0.1)]
+        z-[1]
+        max-h-[250px]
+        overflow-y-auto
+        hidden group-[.open]:block">
+  `;
+
+  items.forEach(item => {
+    html += `
+      <div class="flex items-center gap-[8px] py-[8px] px-[12px]
+                  cursor-pointer text-[0.85rem]
+                  transition-colors duration-[150ms] ease-in-out"
+           data-value="${item.value}">
+        <input
+          type="checkbox"
+          id="${idPrefix}_${item.value}"
+          value="${item.value}"
+          class="${inputClass} w-[16px] h-[16px] accent-[#10b981] cursor-pointer">
+        <label
+          for="${idPrefix}_${item.value}"
+          class="flex flex-1 items-center
+                 cursor-pointer
+                 whitespace-nowrap overflow-hidden text-ellipsis
+                 gap-[var(--space-xs)]
+                 text-[0.7rem] font-[600]
+                 text-[#94a3b8]
+                 uppercase tracking-[0.05em]">
+          ${item.label}
+        </label>
+      </div>
+    `;
   });
+
+  html += `
+      </div>
+    </div>
+  `;
+
+  return html;
 }
 
-// ─── Palette (school chips in sidebar) ──────────────────────
-function initializePalette() {
-  const chips = document.querySelectorAll('.school-chip');
-  chips.forEach(chip => {
-    chip.addEventListener('click', () => {
-      const schoolId = chip.dataset.school;
-
-      chips.forEach(c => c.classList.remove('palette-selected'));
-
-      if (schoolId === 'all' || filters.school === schoolId) {
-        filters.school = 'all';
-        document.querySelector('.school-chip[data-school="all"]').classList.add('palette-selected');
-      } else {
-        filters.school = schoolId;
-        chip.classList.add('palette-selected');
-      }
-
-      applyFilters();
-
-      // Close sidebar on mobile after selection
-      if (window.innerWidth <= 1024) {
-        document.getElementById('sidebar').classList.remove('open');
-        document.querySelector('.sidebar-overlay')?.classList.remove('active');
-      }
-    });
-  });
-}
-
-// ─── Load filter options from API ───────────────────────────
+// ─── Load filter options from API ──────────────────────────
 async function loadFilterOptions() {
   try {
-    const response = await fetch('/infra/api/filter-options');
+    const response = await fetch('/infra/api/extended-filter-options');
     const data = await response.json();
+
     if (data.success) {
-      populateSelect('buildingFilter', data.data.buildings);
-      populateSelect('floorFilter', data.data.floors);
-      populateSelect('classFilter', data.data.classes);
+      populateDateFilter();
+      populatePrograms(data.data.programs);
+      populateYears(data.data.years);
+      populateSections(data.data.sections);
+      populateFaculties(data.data.faculties);
+      populateRooms(data.data.rooms);
+      populateSubjects(data.data.subjects);
+      populateDays(data.data.days);
+      populateTimes(data.data.times);
     }
   } catch (error) {
     console.error('Error loading filter options:', error);
   }
 }
 
-function populateSelect(id, options) {
-  const select = document.getElementById(id);
-  options.forEach(option => {
-    const opt = document.createElement('option');
-    opt.value = option;
-    opt.textContent = option;
-    select.appendChild(opt);
+function populateDateFilter() {
+  const dateFilter = document.getElementById('filterDate');
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const format = d => d.toISOString().split('T')[0];
+  const todayStr = format(today);
+
+  filters.date = todayStr;
+
+  let html = `
+    <label class="flex items-center gap-[4px]
+      text-[0.7rem] font-[600]
+      text-[#94a3b8]
+      uppercase tracking-[0.05em]">
+      DATE
+    </label>
+    <div class="relative min-w-[120px] multi-select group">
+      <div class="flex items-center justify-between
+        py-[6px] px-[10px]
+        bg-[#ffffff]
+        border border-[#e2e8f0]
+        rounded-[8px]
+        cursor-pointer
+        text-[0.85rem]
+        min-h-[32px]
+        gap-[4px]
+        transition-all duration-[150ms] ease-in-out text-[#64748b] hover:border-[#10b981] group-[.open]:border-[#10b981] group-[.open]:ring-2 group-[.open]:ring-[rgba(16,185,129,0.1)]"
+        onclick="toggleMultiSelect(this)">
+        <span id="dateHeaderText">${todayStr}</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          class="w-[14px] h-[14px] shrink-0 text-[#94a3b8]">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </div>
+      <div class="absolute
+        top-[calc(100%+4px)]
+        left-0 right-0
+        bg-[#ffffff]
+        border border-[#e2e8f0]
+        rounded-[8px]
+        shadow-[0_10px_15px_-3px_rgb(0_0_0_/_0.1),_0_4px_6px_-4px_rgb(0_0_0_/_0.1)]
+        z-[1]
+        max-h-[250px]
+        overflow-y-auto
+        hidden group-[.open]:block">
+  `;
+
+  for (let month = 0; month < 12; month++) {
+    const monthName = new Date(currentYear, month, 1).toLocaleString('en-US', { month: 'long' });
+    html += `
+      <div class="px-[12px] py-[6px] text-[0.7rem] font-bold text-slate-500 bg-slate-100">
+        ${monthName} ${currentYear}
+      </div>
+    `;
+    const daysInMonth = new Date(currentYear, month + 1, 0).getDate();
+    for (let day = 1; day <= daysInMonth; day++) {
+      const d = new Date(currentYear, month, day);
+      const value = format(d);
+      html += `
+        <div class="flex items-center gap-[8px] py-[6px] px-[12px] cursor-pointer text-[0.85rem]">
+          <input type="radio" name="dateRadio" value="${value}"
+            class="dateRadio accent-[#10b981]" ${value === todayStr ? 'checked' : ''} />
+          <label class="text-[0.7rem] font-[600] text-[#94a3b8] uppercase">${value}</label>
+        </div>
+      `;
+    }
+  }
+
+  html += `
+      </div>
+    </div>
+  `;
+
+  dateFilter.innerHTML = html;
+
+  dateFilter.addEventListener('change', (e) => {
+    if (!e.target.classList.contains('dateRadio')) return;
+    filters.date = e.target.value;
+    document.getElementById('dateHeaderText').textContent = e.target.value;
+    loadData();
   });
 }
 
-// ─── Load room data ─────────────────────────────────────────
+function populatePrograms(programs) {
+  const el = document.getElementById('filterProgram');
+  const items = programs.map(p => ({ value: p.school_code, label: p.school_name }));
+  el.innerHTML = buildDropdownHTML('PROGRAM', 'All Programs', items, 'programBox', 'infraProgram');
+  el.addEventListener('change', (e) => {
+    if (!e.target.classList.contains('programBox')) return;
+    filters.program = Array.from(el.querySelectorAll('.programBox:checked')).map(cb => cb.value);
+    loadData();
+  });
+}
+
+function populateYears(years) {
+  const el = document.getElementById('filterYear');
+  const items = years.map(y => ({ value: y, label: String(y) }));
+  el.innerHTML = buildDropdownHTML('YEAR', 'All Years', items, 'yearBox', 'infraYear');
+  el.addEventListener('change', (e) => {
+    if (!e.target.classList.contains('yearBox')) return;
+    filters.year = Array.from(el.querySelectorAll('.yearBox:checked')).map(cb => cb.value);
+    loadData();
+  });
+}
+
+function populateSections(sections) {
+  const el = document.getElementById('filterSection');
+  const items = sections.map(s => ({ value: s.class_id, label: s.class_name }));
+  el.innerHTML = buildDropdownHTML('SECTION', 'All Sections', items, 'sectionBox', 'infraSection');
+  el.addEventListener('change', (e) => {
+    if (!e.target.classList.contains('sectionBox')) return;
+    filters.section = Array.from(el.querySelectorAll('.sectionBox:checked')).map(cb => cb.value);
+    loadData();
+  });
+}
+
+function populateFaculties(faculties) {
+  const el = document.getElementById('filterFaculty');
+  const items = faculties.map(f => ({
+    value: f.faculty_id,
+    label: `${f.faculty_first_name} ${f.faculty_last_name}`
+  }));
+  el.innerHTML = buildDropdownHTML('FACULTY', 'All Faculty', items, 'facultyBox', 'infraFaculty');
+  el.addEventListener('change', (e) => {
+    if (!e.target.classList.contains('facultyBox')) return;
+    filters.faculty = Array.from(el.querySelectorAll('.facultyBox:checked')).map(cb => cb.value);
+    loadData();
+  });
+}
+
+function populateRooms(rooms) {
+  const el = document.getElementById('filterRoom');
+  const items = rooms.map(r => ({
+    value: r.room_id,
+    label: `${r.room_name} (${r.floor_name} ${r.floor_building})`
+  }));
+  el.innerHTML = buildDropdownHTML('ROOM', 'All Rooms', items, 'roomBox', 'infraRoom');
+  el.addEventListener('change', (e) => {
+    if (!e.target.classList.contains('roomBox')) return;
+    filters.room = Array.from(el.querySelectorAll('.roomBox:checked')).map(cb => cb.value);
+    loadData();
+  });
+}
+
+function populateSubjects(subjects) {
+  const el = document.getElementById('filterSubject');
+  const items = subjects.map(s => ({
+    value: s.subject_id,
+    label: `${s.subject_code} ${s.subject_name}`
+  }));
+  el.innerHTML = buildDropdownHTML('SUBJECT', 'All Subjects', items, 'subjectBox', 'infraSubject');
+  el.addEventListener('change', (e) => {
+    if (!e.target.classList.contains('subjectBox')) return;
+    filters.subject = Array.from(el.querySelectorAll('.subjectBox:checked')).map(cb => cb.value);
+    loadData();
+  });
+}
+
+function populateDays(days) {
+  const el = document.getElementById('filterDay');
+  const items = days.map(d => ({ value: d, label: d }));
+  el.innerHTML = buildDropdownHTML('DAY', 'All Days', items, 'dayBox', 'infraDay');
+  el.addEventListener('change', (e) => {
+    if (!e.target.classList.contains('dayBox')) return;
+    filters.day = Array.from(el.querySelectorAll('.dayBox:checked')).map(cb => cb.value);
+    loadData();
+  });
+}
+
+function populateTimes(times) {
+  const el = document.getElementById('filterTime');
+  const items = times.map(t => ({ value: t.value, label: t.label }));
+  el.innerHTML = buildDropdownHTML('TIME', 'All Times', items, 'timeBox', 'infraTime');
+  el.addEventListener('change', (e) => {
+    if (!e.target.classList.contains('timeBox')) return;
+    filters.time = Array.from(el.querySelectorAll('.timeBox:checked')).map(cb => cb.value);
+    loadData();
+  });
+}
+
+// ─── Load room data ────────────────────────────────────────
 async function loadData() {
   showLoading();
   try {
-    const roomsRes = await fetch(`/infra/api/rooms?date=${filters.date}`);
+    const queryParams = new URLSearchParams();
+    queryParams.append('date', filters.date);
+
+    ['program', 'year', 'section', 'faculty', 'room', 'subject', 'day', 'time'].forEach(key => {
+      if (Array.isArray(filters[key]) && filters[key].length > 0) {
+        queryParams.append(key, filters[key].join(','));
+      }
+    });
+
+    const roomsRes = await fetch(`/infra/api/rooms?${queryParams}`);
     const roomsData = await roomsRes.json();
     if (roomsData.success) {
       allRooms = roomsData.data;
-      applyFilters();
+      filteredRooms = allRooms;
+      updateStatistics();
+      renderGanttChart();
     }
   } catch (error) {
     console.error('Error loading data:', error);
-    alert('Failed to load data. Please check your database connection.');
   } finally {
     hideLoading();
   }
 }
 
-// ─── Schedule-level filter helpers ──────────────────────────
-function scheduleMatchesSchool(schedule) {
-  if (filters.school === 'all') return true;
-  if (filters.school === 'default') return !schedule.school_id;
-  const schoolId = schedule.school_id ? String(schedule.school_id) : '';
-  const mergedKey = filters.school === '11' ? ['11', '13'] : [filters.school];
-  return mergedKey.includes(schoolId);
-}
-
-function scheduleMatchesClass(schedule) {
-  if (filters.class === 'all') return true;
-  return schedule.class === filters.class;
-}
-
-// ─── Apply all filters ──────────────────────────────────────
-function applyFilters() {
-  filteredRooms = [];
-
-  allRooms.forEach(room => {
-    if (filters.building !== 'all' && room.building !== filters.building) return;
-    if (filters.floor !== 'all' && room.floor !== filters.floor) return;
-
-    if (filters.category !== 'all') {
-      const roomCat = (room.room_category || 'Others').trim();
-      if (roomCat !== filters.category) return;
-    }
-
-    // Filter schedules within this room
-    const matchedSchedules = room.schedules.filter(s =>
-      scheduleMatchesSchool(s) && scheduleMatchesClass(s)
-    );
-
-    const hasMatched = matchedSchedules.length > 0;
-    if (!filters.showAvailable && !hasMatched) return;
-    if (!filters.showOccupied && hasMatched) return;
-
-    // If school or class filter active, skip rooms with no matching schedules
-    if ((filters.school !== 'all' || filters.class !== 'all') && !hasMatched) return;
-
-    filteredRooms.push({ ...room, schedules: matchedSchedules });
-  });
-
-  updateFilteredStatistics();
-  renderGanttChart();
-}
-
-// ─── Statistics ─────────────────────────────────────────────
+// ─── Statistics ────────────────────────────────────────────
 function timeToMinutes(timeStr) {
   if (!timeStr) return 0;
   const [h, m] = timeStr.split(':').map(Number);
@@ -194,7 +374,7 @@ function calculateOccupiedMinutes(schedules) {
   }, 0);
 }
 
-function updateFilteredStatistics() {
+function updateStatistics() {
   const totalRooms     = filteredRooms.length;
   const occupiedRooms  = filteredRooms.filter(r => r.schedules.length > 0).length;
   const availableRooms = totalRooms - occupiedRooms;
@@ -210,13 +390,9 @@ function updateFilteredStatistics() {
   document.getElementById('occupiedRooms').textContent  = occupiedRooms;
   document.getElementById('availableRooms').textContent = availableRooms;
   document.getElementById('occupancyRate').textContent  = occupancyRate + '%';
-
-  // Update header stats too
-  document.getElementById('headerOccupied').textContent  = occupiedRooms;
-  document.getElementById('headerAvailable').textContent = availableRooms;
 }
 
-// ─── School colour helpers ──────────────────────────────────
+// ─── School colour helpers ─────────────────────────────────
 function getSchoolColor(schoolId) {
   const colors = {
     7:       '#e12a7b',
@@ -242,7 +418,7 @@ function getSchoolGradient(schoolId) {
   return `linear-gradient(135deg, ${color} 0%, ${lighten(color, 15)} 100%)`;
 }
 
-// ─── Gantt Chart rendering ──────────────────────────────────
+// ─── Gantt Chart rendering ─────────────────────────────────
 function renderGanttChart() {
   const container = document.getElementById('ganttChart');
   const noData    = document.getElementById('noData');
@@ -321,7 +497,7 @@ function calculateWidth(startTime, endTime, startHour, endHour) {
   return calculatePosition(endTime, startHour, endHour) - calculatePosition(startTime, startHour, endHour);
 }
 
-// ─── CSV Export ─────────────────────────────────────────────
+// ─── CSV Export ────────────────────────────────────────────
 function exportToCSV() {
   const rows = [['Room','Category','Building','Floor','Subject','Class','Faculty','Start','End','School']];
 
@@ -365,31 +541,36 @@ function getSchoolLabel(id) {
   return schoolMap[id] || 'Unknown';
 }
 
-// ─── Clear filters ──────────────────────────────────────────
-function clearFilters() {
-  filters.building = 'all';
-  filters.floor = 'all';
-  filters.class = 'all';
-  filters.category = 'all';
-  filters.school = 'all';
-  filters.showAvailable = true;
-  filters.showOccupied = true;
+// ─── Clear filters ─────────────────────────────────────────
+function clearAllFilters() {
+  filters = {
+    date: new Date().toISOString().split('T')[0],
+    program: [],
+    year: [],
+    section: [],
+    faculty: [],
+    room: [],
+    subject: [],
+    day: [],
+    time: []
+  };
 
-  document.getElementById('buildingFilter').value = 'all';
-  document.getElementById('floorFilter').value = 'all';
-  document.getElementById('classFilter').value = 'all';
-  document.getElementById('categoryFilter').value = 'all';
-  document.getElementById('showAvailable').checked = true;
-  document.getElementById('showOccupied').checked = true;
+  // Uncheck all checkboxes
+  document.querySelectorAll('.programBox, .yearBox, .sectionBox, .facultyBox, .roomBox, .subjectBox, .dayBox, .timeBox').forEach(cb => {
+    cb.checked = false;
+  });
 
-  // Reset school chips
-  document.querySelectorAll('.school-chip').forEach(c => c.classList.remove('palette-selected'));
-  document.querySelector('.school-chip[data-school="all"]').classList.add('palette-selected');
+  // Reset date radio
+  const todayStr = filters.date;
+  const dateHeaderText = document.getElementById('dateHeaderText');
+  if (dateHeaderText) dateHeaderText.textContent = todayStr;
+  const todayRadio = document.querySelector(`input.dateRadio[value="${todayStr}"]`);
+  if (todayRadio) todayRadio.checked = true;
 
-  applyFilters();
+  loadData();
 }
 
-// ─── Loading helpers ────────────────────────────────────────
+// ─── Loading helpers ───────────────────────────────────────
 function showLoading() {
   document.getElementById('loading').style.display = 'block';
   document.getElementById('ganttChart').style.display = 'none';
@@ -400,54 +581,8 @@ function hideLoading() {
   document.getElementById('ganttChart').style.display = 'block';
 }
 
-// ─── Event listeners ────────────────────────────────────────
+// ─── Event listeners ───────────────────────────────────────
 function attachEventListeners() {
-  document.getElementById('dateFilter').addEventListener('change', e => {
-    filters.date = e.target.value;
-    loadData();
-  });
-
-  document.getElementById('buildingFilter').addEventListener('change', e => {
-    filters.building = e.target.value;
-    applyFilters();
-  });
-
-  document.getElementById('floorFilter').addEventListener('change', e => {
-    filters.floor = e.target.value;
-    applyFilters();
-  });
-
-  document.getElementById('classFilter').addEventListener('change', e => {
-    filters.class = e.target.value;
-    applyFilters();
-  });
-
-  document.getElementById('categoryFilter').addEventListener('change', e => {
-    filters.category = e.target.value;
-    applyFilters();
-  });
-
-  document.getElementById('showAvailable').addEventListener('change', e => {
-    filters.showAvailable = e.target.checked;
-    applyFilters();
-  });
-
-  document.getElementById('showOccupied').addEventListener('change', e => {
-    filters.showOccupied = e.target.checked;
-    applyFilters();
-  });
-
-  document.getElementById('refreshBtn').addEventListener('click', e => {
-    e.preventDefault();
-    location.reload();
-  });
-
-  // Export CSV — both sidebar nav and any export button
-  document.getElementById('exportNavBtn')?.addEventListener('click', e => {
-    e.preventDefault();
-    exportToCSV();
-  });
-
   // Clear filters button
-  document.getElementById('clearFiltersBtn')?.addEventListener('click', clearFilters);
+  document.getElementById('clearFilters')?.addEventListener('click', clearAllFilters);
 }
