@@ -6,9 +6,7 @@ let filters = {
   building: 'all',
   floor: 'all',
   category: 'all',
-  school: 'all',
-  showAvailable: true,
-  showOccupied: true
+  school: 'all'
 };
 
 // Day operating hours for occupancy rate calculation
@@ -95,33 +93,25 @@ function buildSelectDropdownHTML(label, placeholder, items, idPrefix) {
 
   // "All" option
   html += `
-    <div class="flex items-center gap-[8px] py-[8px] px-[12px]
-                cursor-pointer text-[0.85rem]
+    <div class="dropdown-option selected py-[8px] px-[12px]
+                cursor-pointer
+                text-[0.7rem] font-[600] text-[#1e293b] uppercase tracking-[0.05em]
+                hover:bg-[#f1f5f9]
                 transition-colors duration-[150ms] ease-in-out"
          data-value="all">
-      <input type="radio" name="${idPrefix}Radio" value="all"
-        class="${idPrefix}Radio accent-[#10b981] cursor-pointer" checked />
-      <label class="flex flex-1 items-center cursor-pointer
-             whitespace-nowrap overflow-hidden text-ellipsis
-             text-[0.7rem] font-[600] text-[#94a3b8] uppercase tracking-[0.05em]">
-        ${placeholder}
-      </label>
+      ${placeholder}
     </div>
   `;
 
   items.forEach(item => {
     html += `
-      <div class="flex items-center gap-[8px] py-[8px] px-[12px]
-                  cursor-pointer text-[0.85rem]
+      <div class="dropdown-option py-[8px] px-[12px]
+                  cursor-pointer
+                  text-[0.7rem] font-[600] text-[#94a3b8] uppercase tracking-[0.05em]
+                  hover:bg-[#f1f5f9]
                   transition-colors duration-[150ms] ease-in-out"
            data-value="${item.value}">
-        <input type="radio" name="${idPrefix}Radio" value="${item.value}"
-          class="${idPrefix}Radio accent-[#10b981] cursor-pointer" />
-        <label class="flex flex-1 items-center cursor-pointer
-               whitespace-nowrap overflow-hidden text-ellipsis
-               text-[0.7rem] font-[600] text-[#94a3b8] uppercase tracking-[0.05em]">
-          ${item.label}
-        </label>
+        ${item.label}
       </div>
     `;
   });
@@ -219,43 +209,52 @@ function initDatePicker() {
   });
 }
 
+function attachDropdownClick(container, filterKey, placeholder) {
+  container.addEventListener('click', (e) => {
+    const option = e.target.closest('.dropdown-option');
+    if (!option) return;
+    const value = option.dataset.value;
+
+    // Update selected styling
+    container.querySelectorAll('.dropdown-option').forEach(o => {
+      o.classList.remove('selected');
+      o.classList.remove('text-[#1e293b]');
+      o.classList.add('text-[#94a3b8]');
+    });
+    option.classList.add('selected');
+    option.classList.remove('text-[#94a3b8]');
+    option.classList.add('text-[#1e293b]');
+
+    filters[filterKey] = value;
+    const idPrefix = filterKey;
+    document.getElementById(`${idPrefix}HeaderText`).textContent =
+      value === 'all' ? placeholder : value;
+
+    // Close dropdown after selection
+    container.querySelector('.multi-select')?.classList.remove('open');
+    applyFilters();
+  });
+}
+
 function populateBuildingFilter(buildings) {
   const el = document.getElementById('filterBuilding');
   const items = buildings.map(b => ({ value: b, label: b }));
   el.innerHTML = buildSelectDropdownHTML('BUILDING', 'All Buildings', items, 'building');
-  el.addEventListener('change', (e) => {
-    if (!e.target.classList.contains('buildingRadio')) return;
-    filters.building = e.target.value;
-    document.getElementById('buildingHeaderText').textContent =
-      e.target.value === 'all' ? 'All Buildings' : e.target.value;
-    applyFilters();
-  });
+  attachDropdownClick(el, 'building', 'All Buildings');
 }
 
 function populateFloorFilter(floors) {
   const el = document.getElementById('filterFloor');
   const items = floors.map(f => ({ value: f, label: f }));
   el.innerHTML = buildSelectDropdownHTML('FLOOR', 'All Floors', items, 'floor');
-  el.addEventListener('change', (e) => {
-    if (!e.target.classList.contains('floorRadio')) return;
-    filters.floor = e.target.value;
-    document.getElementById('floorHeaderText').textContent =
-      e.target.value === 'all' ? 'All Floors' : e.target.value;
-    applyFilters();
-  });
+  attachDropdownClick(el, 'floor', 'All Floors');
 }
 
 function populateCategoryFilter(categories) {
   const el = document.getElementById('filterCategory');
   const items = categories.map(c => ({ value: c, label: c }));
   el.innerHTML = buildSelectDropdownHTML('CATEGORY', 'All Categories', items, 'category');
-  el.addEventListener('change', (e) => {
-    if (!e.target.classList.contains('categoryRadio')) return;
-    filters.category = e.target.value;
-    document.getElementById('categoryHeaderText').textContent =
-      e.target.value === 'all' ? 'All Categories' : e.target.value;
-    applyFilters();
-  });
+  attachDropdownClick(el, 'category', 'All Categories');
 }
 
 // ─── Load room data ─────────────────────────────────────────
@@ -304,8 +303,6 @@ function applyFilters() {
     );
 
     const hasMatched = matchedSchedules.length > 0;
-    if (!filters.showAvailable && !hasMatched) return;
-    if (!filters.showOccupied && hasMatched) return;
 
     // If school filter active, skip rooms with no matching schedules
     if (filters.school !== 'all' && !hasMatched) return;
@@ -507,33 +504,38 @@ function clearFilters() {
   filters.floor = 'all';
   filters.category = 'all';
   filters.school = 'all';
-  filters.showAvailable = true;
-  filters.showOccupied = true;
 
   // Reset date to today
   const todayStr = new Date().toISOString().split('T')[0];
   filters.date = todayStr;
   document.getElementById('filterDate').value = todayStr;
 
-  // Reset radio buttons to "all"
+  // Reset dropdown selections
+  const labels = { building: 'All Buildings', floor: 'All Floors', category: 'All Categories' };
   ['building', 'floor', 'category'].forEach(prefix => {
-    const allRadio = document.querySelector(`input.${prefix}Radio[value="all"]`);
-    if (allRadio) allRadio.checked = true;
     const headerText = document.getElementById(`${prefix}HeaderText`);
-    if (headerText) {
-      const labels = { building: 'All Buildings', floor: 'All Floors', category: 'All Categories' };
-      headerText.textContent = labels[prefix];
+    if (headerText) headerText.textContent = labels[prefix];
+    // Reset selected styling
+    const container = document.getElementById(`filter${prefix.charAt(0).toUpperCase() + prefix.slice(1)}`);
+    if (container) {
+      container.querySelectorAll('.dropdown-option').forEach(o => {
+        o.classList.remove('selected', 'text-[#1e293b]');
+        o.classList.add('text-[#94a3b8]');
+      });
+      const allOption = container.querySelector('.dropdown-option[data-value="all"]');
+      if (allOption) {
+        allOption.classList.add('selected', 'text-[#1e293b]');
+        allOption.classList.remove('text-[#94a3b8]');
+      }
     }
   });
-
-  document.getElementById('showAvailable').checked = true;
-  document.getElementById('showOccupied').checked = true;
 
   // Reset school chips
   document.querySelectorAll('.school-chip').forEach(c => c.classList.remove('palette-selected'));
   document.querySelector('.school-chip[data-school="all"]').classList.add('palette-selected');
 
   applyFilters();
+  loadData();
 }
 
 // ─── Loading helpers ────────────────────────────────────────
@@ -549,16 +551,6 @@ function hideLoading() {
 
 // ─── Event listeners ────────────────────────────────────────
 function attachEventListeners() {
-  document.getElementById('showAvailable').addEventListener('change', e => {
-    filters.showAvailable = e.target.checked;
-    applyFilters();
-  });
-
-  document.getElementById('showOccupied').addEventListener('change', e => {
-    filters.showOccupied = e.target.checked;
-    applyFilters();
-  });
-
   // Export CSV — sidebar nav
   document.getElementById('exportNavBtn')?.addEventListener('click', e => {
     e.preventDefault();
