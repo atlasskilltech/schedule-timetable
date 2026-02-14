@@ -1,6 +1,6 @@
 <%- include('partials/header', { active: 'student-search' }) %>
 
-<div class="p-[32px]">
+<div class="p-[16px] md:p-[32px]">
 
   <!-- Search Filter -->
   <div class="filters-container">
@@ -15,7 +15,7 @@
   </div>
 
   <!-- Stats Bar -->
-  <div id="statsBar" class="flex bg-[#1e293b] rounded-[12px] px-[24px] py-[16px] mb-[24px] gap-[32px]" style="display:none">
+  <div id="statsBar" class="flex flex-wrap bg-[#1e293b] rounded-[12px] px-[16px] md:px-[24px] py-[12px] md:py-[16px] mb-[24px] gap-[16px] md:gap-[32px]" style="display:none">
     <div class="flex flex-col gap-[2px]">
       <span class="text-[0.7rem] text-[#94a3b8] uppercase tracking-[0.05em]">RESULTS</span>
       <span class="text-[1rem] font-[600] text-white" id="resultCount">0</span>

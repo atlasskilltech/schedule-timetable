@@ -1,10 +1,10 @@
 <%- include('partials/header', { active: 'student-dashboard' }) %>
 
-<div class="p-[32px]">
+<div class="p-[16px] md:p-[32px]">
 
   <!-- Back + Context -->
-  <div class="flex items-center justify-between mb-[16px]">
-    <div class="flex items-center gap-[12px]">
+  <div class="flex flex-wrap items-center justify-between gap-[12px] mb-[16px]">
+    <div class="flex items-center gap-[8px] md:gap-[12px]">
       <a href="/student-count" class="bg-transparent text-[#64748b] border border-[#e2e8f0] inline-flex items-center gap-[6px]
         py-[8px] px-[16px] rounded-[8px] text-[0.85rem] font-[500] cursor-pointer
         transition-all duration-[150ms] ease-in-out hover:bg-[#f1f5f9] hover:text-[#1e293b]" style="text-decoration:none;font-family:var(--font-main)">
@@ -22,26 +22,26 @@
   </div>
 
   <!-- Context breadcrumb bar -->
-  <div id="ctxBar" class="flex bg-[#1e293b] rounded-[12px] px-[24px] py-[16px] mb-[24px] gap-[32px]" style="display:none">
+  <div id="ctxBar" class="flex flex-wrap bg-[#1e293b] rounded-[12px] px-[16px] md:px-[24px] py-[12px] md:py-[16px] mb-[24px] gap-[12px] md:gap-[32px]" style="display:none">
     <div class="flex flex-col gap-[2px]">
-      <span class="text-[0.7rem] text-[#94a3b8] uppercase tracking-[0.05em]">SCHOOL</span>
-      <span class="text-[1rem] font-[600] text-white" id="cSchool">-</span>
+      <span class="text-[0.65rem] md:text-[0.7rem] text-[#94a3b8] uppercase tracking-[0.05em]">SCHOOL</span>
+      <span class="text-[0.85rem] md:text-[1rem] font-[600] text-white" id="cSchool">-</span>
     </div>
     <div class="flex flex-col gap-[2px]">
-      <span class="text-[0.7rem] text-[#94a3b8] uppercase tracking-[0.05em]">PROGRAM</span>
-      <span class="text-[1rem] font-[600] text-white" id="cProgram">-</span>
+      <span class="text-[0.65rem] md:text-[0.7rem] text-[#94a3b8] uppercase tracking-[0.05em]">PROGRAM</span>
+      <span class="text-[0.85rem] md:text-[1rem] font-[600] text-white" id="cProgram">-</span>
     </div>
     <div class="flex flex-col gap-[2px]">
-      <span class="text-[0.7rem] text-[#94a3b8] uppercase tracking-[0.05em]">COHORT</span>
-      <span class="text-[1rem] font-[600] text-white" id="cCohort">-</span>
+      <span class="text-[0.65rem] md:text-[0.7rem] text-[#94a3b8] uppercase tracking-[0.05em]">COHORT</span>
+      <span class="text-[0.85rem] md:text-[1rem] font-[600] text-white" id="cCohort">-</span>
     </div>
     <div class="flex flex-col gap-[2px]">
-      <span class="text-[0.7rem] text-[#94a3b8] uppercase tracking-[0.05em]">DIVISION</span>
-      <span class="text-[0.85rem] font-[600]" style="color:#34d399" id="cDiv">-</span>
+      <span class="text-[0.65rem] md:text-[0.7rem] text-[#94a3b8] uppercase tracking-[0.05em]">DIVISION</span>
+      <span class="text-[0.75rem] md:text-[0.85rem] font-[600]" style="color:#34d399" id="cDiv">-</span>
     </div>
     <div class="flex flex-col gap-[2px]">
-      <span class="text-[0.7rem] text-[#94a3b8] uppercase tracking-[0.05em]">STUDENTS</span>
-      <span class="text-[1rem] font-[700] text-white" id="cCount">0</span>
+      <span class="text-[0.65rem] md:text-[0.7rem] text-[#94a3b8] uppercase tracking-[0.05em]">STUDENTS</span>
+      <span class="text-[0.9rem] md:text-[1rem] font-[700] text-white" id="cCount">0</span>
     </div>
   </div>
 

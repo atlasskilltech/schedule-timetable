@@ -1330,16 +1330,257 @@ body {
 @media (max-width: 768px) {
   .gantt-room-header,
   .gantt-room-info {
-    width: 140px;
-    min-width: 140px;
-    padding: 10px 12px;
+    width: 120px;
+    min-width: 120px;
+    padding: 8px 10px;
   }
 
   .gantt-room-name {
-    font-size: 12px;
+    font-size: 11px;
+  }
+
+  .gantt-room-detail {
+    font-size: 10px;
   }
 
   .infra-sidebar {
     width: 260px;
+  }
+
+  .gantt-hour {
+    padding: 10px 2px;
+    font-size: 9px;
+  }
+
+  .gantt-schedule .schedule-title {
+    font-size: 10px;
+  }
+
+  .gantt-schedule .schedule-time,
+  .gantt-schedule .schedule-info {
+    font-size: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .gantt-room-header,
+  .gantt-room-info {
+    width: 90px;
+    min-width: 90px;
+    padding: 6px 8px;
+  }
+
+  .gantt-room-name {
+    font-size: 10px;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   COMPREHENSIVE MOBILE RESPONSIVE STYLES
+   ════════════════════════════════════════════════════════════ */
+
+/* ─── Tablet breakpoint (1024px) ───────────────────────── */
+@media (max-width: 1024px) {
+  .filters-container {
+    padding: 16px;
+  }
+
+  .filter-toggles {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .modal-content {
+    max-width: 95vw;
+  }
+}
+
+/* ─── Mobile breakpoint (768px) ────────────────────────── */
+@media (max-width: 768px) {
+  /* ── Page content padding ── */
+  .p-\[32px\] {
+    padding: 16px !important;
+  }
+
+  /* ── Modal adjustments ── */
+  .modal-overlay {
+    padding: 12px;
+  }
+
+  .modal-content {
+    max-width: 100%;
+    max-height: 95vh;
+  }
+
+  .modal-header {
+    padding: 16px;
+  }
+
+  .modal-body {
+    padding: 16px;
+  }
+
+  /* ── Schedule items ── */
+  .schedule-item {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .schedule-time-badge {
+    align-self: flex-start;
+  }
+
+  /* ── Tabs responsive ── */
+  .tabs-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 12px 12px 0;
+    gap: 0;
+  }
+
+  .tab-button {
+    padding: 8px 14px;
+    font-size: 13px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .tab-content {
+    padding: 16px;
+  }
+
+  /* ── Unscheduled items ── */
+  .unscheduled-item {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .unscheduled-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+
+  /* ── Filter toggles ── */
+  .filter-toggles {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  /* ── Feedback button ── */
+  .feedback-btn {
+    top: auto;
+    bottom: 16px;
+    right: 16px;
+    top: initial;
+  }
+
+  /* ── Buttons ── */
+  .btn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  /* ── Loading & empty states ── */
+  .loading-state,
+  .empty-state {
+    padding: 40px 16px;
+  }
+
+  .empty-icon {
+    font-size: 36px;
+  }
+
+  .empty-state h3 {
+    font-size: 16px;
+  }
+
+  /* ── Card adjustments ── */
+  .class-card {
+    padding: 14px;
+  }
+
+  .subject-name {
+    font-size: 14px;
+  }
+
+  .card-info-row {
+    font-size: 12px;
+  }
+
+  /* ── Day section ── */
+  .day-header {
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 16px;
+  }
+
+  .day-title {
+    font-size: 16px;
+  }
+
+  /* ── Timetable version box ── */
+  .timetable-version {
+    padding: 16px;
+  }
+
+  .version-info {
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  /* ── Filters container ── */
+  .filters-container {
+    padding: 12px;
+  }
+
+  .clear-filters-btn {
+    position: static;
+    margin-top: 12px;
+  }
+}
+
+/* ─── Small mobile breakpoint (480px) ──────────────────── */
+@media (max-width: 480px) {
+  .class-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .version-info {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .day-header {
+    padding: 10px 12px;
+  }
+
+  .day-title {
+    font-size: 14px;
+  }
+
+  .class-card {
+    padding: 12px;
+  }
+
+  .card-time-value {
+    font-size: 11px;
+  }
+
+  .modal-header h2 {
+    font-size: 16px;
+  }
+
+  /* ── Infra filter ── */
+  .infra-filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* ── Tabs ── */
+  .tab-button {
+    padding: 6px 10px;
+    font-size: 12px;
   }
 }
