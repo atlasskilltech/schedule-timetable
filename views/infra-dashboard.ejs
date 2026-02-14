@@ -1,8 +1,52 @@
 <%- include('partials/header', { active: 'infra-rooms' }) %>
 
+<!-- Right Sidebar for School Filter -->
+<aside id="sidebar" class="infra-sidebar">
+  <div class="infra-sidebar-header">
+    <h3>Filter by School</h3>
+    <button class="sidebar-toggle-close" data-sidebar-toggle>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+  </div>
+  <div class="school-chips">
+    <button class="school-chip palette-selected" data-school="all">
+      <span class="chip-dot" style="background:#94a3b8;"></span> All Schools
+    </button>
+    <button class="school-chip" data-school="default">
+      <span class="chip-dot" style="background:#342b7c;"></span> Elective
+    </button>
+    <button class="school-chip" data-school="7">
+      <span class="chip-dot" style="background:#e12a7b;"></span> ATLAS ISDI
+    </button>
+    <button class="school-chip" data-school="8">
+      <span class="chip-dot" style="background:#009fe0;"></span> ATLAS ISME
+    </button>
+    <button class="school-chip" data-school="11">
+      <span class="chip-dot" style="background:#ed1a3b;"></span> ATLAS INSOFE / UGDX
+    </button>
+    <button class="school-chip" data-school="16">
+      <span class="chip-dot" style="background:#CC5500;"></span> ATLAS LAW
+    </button>
+  </div>
+
+  <div class="infra-sidebar-actions">
+    <a href="#" id="exportNavBtn" class="sidebar-action-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="7 10 12 15 17 10"></polyline>
+        <line x1="12" y1="15" x2="12" y2="3"></line>
+      </svg>
+      Export CSV
+    </a>
+  </div>
+</aside>
+
 <div class="p-[32px]">
 
-      <!-- Filters Bar -->
+      <!-- Filters Bar (dashboard-style) -->
       <div class="flex flex-wrap items-end
             gap-[4px]
             py-[8px] px-[16px]
@@ -14,33 +58,47 @@
         <!-- DATE -->
         <div class="min-w-[100px] flex flex-col gap-[2px] shrink basis-auto grow-0" id="filterDate"></div>
 
-        <!-- PROGRAM -->
-        <div class="min-w-[100px] flex flex-col gap-[2px] shrink basis-auto grow-0" id="filterProgram"></div>
+        <!-- BUILDING -->
+        <div class="min-w-[100px] flex flex-col gap-[2px] shrink basis-auto grow-0" id="filterBuilding"></div>
 
-        <!-- YEAR -->
-        <div class="min-w-[100px] flex flex-col gap-[2px] shrink basis-auto grow-0" id="filterYear"></div>
+        <!-- FLOOR -->
+        <div class="min-w-[100px] flex flex-col gap-[2px] shrink basis-auto grow-0" id="filterFloor"></div>
 
-        <!-- SECTION -->
-        <div class="min-w-[100px] flex flex-col gap-[2px] shrink basis-auto grow-0" id="filterSection"></div>
+        <!-- CLASS -->
+        <div class="min-w-[100px] flex flex-col gap-[2px] shrink basis-auto grow-0" id="filterClass"></div>
 
-        <!-- FACULTY -->
-        <div class="min-w-[100px] flex flex-col gap-[2px] shrink basis-auto grow-0" id="filterFaculty"></div>
+        <!-- CATEGORY -->
+        <div class="min-w-[100px] flex flex-col gap-[2px] shrink basis-auto grow-0" id="filterCategory"></div>
 
-        <!-- ROOM -->
-        <div class="min-w-[100px] flex flex-col gap-[2px] shrink basis-auto grow-0" id="filterRoom"></div>
+        <!-- Show Available toggle -->
+        <label class="flex items-center gap-[6px] text-[0.8rem] font-[500] text-[#64748b] cursor-pointer px-[8px] py-[6px] h-fit whitespace-nowrap">
+          <input type="checkbox" id="showAvailable" checked class="w-[16px] h-[16px] accent-[#10b981] cursor-pointer"> Available
+        </label>
 
-        <!-- SUBJECT -->
-        <div class="min-w-[100px] flex flex-col gap-[2px] shrink basis-auto grow-0" id="filterSubject"></div>
+        <!-- Show Occupied toggle -->
+        <label class="flex items-center gap-[6px] text-[0.8rem] font-[500] text-[#64748b] cursor-pointer px-[8px] py-[6px] h-fit whitespace-nowrap">
+          <input type="checkbox" id="showOccupied" checked class="w-[16px] h-[16px] accent-[#10b981] cursor-pointer"> Occupied
+        </label>
 
-        <!-- DAY -->
-        <div class="min-w-[100px] flex flex-col gap-[2px] shrink basis-auto grow-0" id="filterDay"></div>
+        <!-- Schools button -->
+        <button id="sidebarToggle" class="bg-slate-100 text-slate-800 border border-slate-200 inline-flex items-center gap-2 px-4 py-2 rounded-lg
+text-[0.85rem] font-medium cursor-pointer
+transition-all duration-[150ms] ease-in-out h-fit whitespace-nowrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <line x1="4" y1="21" x2="4" y2="14"></line>
+            <line x1="4" y1="10" x2="4" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12" y2="3"></line>
+            <line x1="20" y1="21" x2="20" y2="16"></line>
+            <line x1="20" y1="12" x2="20" y2="3"></line>
+          </svg>
+          Schools
+        </button>
 
-        <!-- TIME -->
-        <div class="min-w-[100px] flex flex-col gap-[2px] shrink basis-auto grow-0" id="filterTime"></div>
-
+        <!-- Clear button -->
         <button class="bg-slate-100 text-slate-800 border border-slate-200 inline-flex items-center gap-2 px-4 py-2 rounded-lg
 text-[0.85rem] font-medium cursor-pointer
-transition-all duration-[150ms] ease-in-out h-fit whitespace-nowrap" id="clearFilters">Clear</button>
+transition-all duration-[150ms] ease-in-out h-fit whitespace-nowrap" id="clearFiltersBtn">Clear</button>
 
       </div>
 

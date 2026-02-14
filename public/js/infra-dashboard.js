@@ -3,14 +3,13 @@ let allRooms = [];
 let filteredRooms = [];
 let filters = {
   date: new Date().toISOString().split('T')[0],
-  program: [],
-  year: [],
-  section: [],
-  faculty: [],
-  room: [],
-  subject: [],
-  day: [],
-  time: []
+  building: 'all',
+  floor: 'all',
+  class: 'all',
+  category: 'all',
+  school: 'all',
+  showAvailable: true,
+  showOccupied: true
 };
 
 // Day operating hours for occupancy rate calculation
@@ -18,14 +17,16 @@ const DAY_START_HOUR = 7;
 const DAY_END_HOUR   = 19;
 const DAY_TOTAL_HOURS = DAY_END_HOUR - DAY_START_HOUR;
 
-// Initialize on page load
+// ─── Initialize ─────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   loadFilterOptions();
   loadData();
   attachEventListeners();
+  initializePalette();
+  initializeSidebar();
 });
 
-// ─── Multi-select dropdown toggle ──────────────────────────
+// ─── Multi-select dropdown toggle ───────────────────────────
 function toggleMultiSelect(displayEl) {
   const container = displayEl.parentElement;
   const wasOpen = container.classList.contains('open');
@@ -50,8 +51,8 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// ─── Filter dropdown builder helper ────────────────────────
-function buildDropdownHTML(label, placeholder, items, inputClass, idPrefix) {
+// ─── Dropdown builder helper ────────────────────────────────
+function buildSelectDropdownHTML(label, placeholder, items, idPrefix) {
   let html = `
     <label class="flex items-center gap-[4px]
       text-[0.7rem] font-[600]
@@ -71,7 +72,7 @@ function buildDropdownHTML(label, placeholder, items, inputClass, idPrefix) {
         gap-[4px]
         transition-all duration-[150ms] ease-in-out text-[#64748b] hover:border-[#10b981] group-[.open]:border-[#10b981] group-[.open]:ring-2 group-[.open]:ring-[rgba(16,185,129,0.1)]"
         onclick="toggleMultiSelect(this)">
-        <span class="text-[#64748b] whitespace-nowrap overflow-hidden text-ellipsis">
+        <span class="text-[#64748b] whitespace-nowrap overflow-hidden text-ellipsis" id="${idPrefix}HeaderText">
           ${placeholder}
         </span>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -93,26 +94,33 @@ function buildDropdownHTML(label, placeholder, items, inputClass, idPrefix) {
         hidden group-[.open]:block">
   `;
 
+  // "All" option
+  html += `
+    <div class="flex items-center gap-[8px] py-[8px] px-[12px]
+                cursor-pointer text-[0.85rem]
+                transition-colors duration-[150ms] ease-in-out"
+         data-value="all">
+      <input type="radio" name="${idPrefix}Radio" value="all"
+        class="${idPrefix}Radio accent-[#10b981] cursor-pointer" checked />
+      <label class="flex flex-1 items-center cursor-pointer
+             whitespace-nowrap overflow-hidden text-ellipsis
+             text-[0.7rem] font-[600] text-[#94a3b8] uppercase tracking-[0.05em]">
+        ${placeholder}
+      </label>
+    </div>
+  `;
+
   items.forEach(item => {
     html += `
       <div class="flex items-center gap-[8px] py-[8px] px-[12px]
                   cursor-pointer text-[0.85rem]
                   transition-colors duration-[150ms] ease-in-out"
            data-value="${item.value}">
-        <input
-          type="checkbox"
-          id="${idPrefix}_${item.value}"
-          value="${item.value}"
-          class="${inputClass} w-[16px] h-[16px] accent-[#10b981] cursor-pointer">
-        <label
-          for="${idPrefix}_${item.value}"
-          class="flex flex-1 items-center
-                 cursor-pointer
-                 whitespace-nowrap overflow-hidden text-ellipsis
-                 gap-[var(--space-xs)]
-                 text-[0.7rem] font-[600]
-                 text-[#94a3b8]
-                 uppercase tracking-[0.05em]">
+        <input type="radio" name="${idPrefix}Radio" value="${item.value}"
+          class="${idPrefix}Radio accent-[#10b981] cursor-pointer" />
+        <label class="flex flex-1 items-center cursor-pointer
+               whitespace-nowrap overflow-hidden text-ellipsis
+               text-[0.7rem] font-[600] text-[#94a3b8] uppercase tracking-[0.05em]">
           ${item.label}
         </label>
       </div>
@@ -127,22 +135,74 @@ function buildDropdownHTML(label, placeholder, items, inputClass, idPrefix) {
   return html;
 }
 
-// ─── Load filter options from API ──────────────────────────
+// ─── Sidebar toggle (mobile) ────────────────────────────────
+function initializeSidebar() {
+  const toggle = document.getElementById('sidebarToggle');
+  const sidebar = document.getElementById('sidebar');
+  const closeBtn = document.querySelector('[data-sidebar-toggle]');
+
+  // Create overlay element
+  const overlay = document.createElement('div');
+  overlay.className = 'sidebar-overlay';
+  document.body.appendChild(overlay);
+
+  toggle.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('active');
+  });
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('active');
+    });
+  }
+
+  overlay.addEventListener('click', () => {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('active');
+  });
+}
+
+// ─── Palette (school chips in sidebar) ──────────────────────
+function initializePalette() {
+  const chips = document.querySelectorAll('.school-chip');
+  chips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      const schoolId = chip.dataset.school;
+
+      chips.forEach(c => c.classList.remove('palette-selected'));
+
+      if (schoolId === 'all' || filters.school === schoolId) {
+        filters.school = 'all';
+        document.querySelector('.school-chip[data-school="all"]').classList.add('palette-selected');
+      } else {
+        filters.school = schoolId;
+        chip.classList.add('palette-selected');
+      }
+
+      applyFilters();
+
+      // Close sidebar on mobile after selection
+      if (window.innerWidth <= 1024) {
+        document.getElementById('sidebar').classList.remove('open');
+        document.querySelector('.sidebar-overlay')?.classList.remove('active');
+      }
+    });
+  });
+}
+
+// ─── Load filter options from API ───────────────────────────
 async function loadFilterOptions() {
   try {
-    const response = await fetch('/infra/api/extended-filter-options');
+    const response = await fetch('/infra/api/filter-options');
     const data = await response.json();
-
     if (data.success) {
       populateDateFilter();
-      populatePrograms(data.data.programs);
-      populateYears(data.data.years);
-      populateSections(data.data.sections);
-      populateFaculties(data.data.faculties);
-      populateRooms(data.data.rooms);
-      populateSubjects(data.data.subjects);
-      populateDays(data.data.days);
-      populateTimes(data.data.times);
+      populateBuildingFilter(data.data.buildings);
+      populateFloorFilter(data.data.floors);
+      populateClassFilter(data.data.classes);
+      populateCategoryFilter(data.data.categories);
     }
   } catch (error) {
     console.error('Error loading filter options:', error);
@@ -232,132 +292,123 @@ function populateDateFilter() {
   });
 }
 
-function populatePrograms(programs) {
-  const el = document.getElementById('filterProgram');
-  const items = programs.map(p => ({ value: p.school_code, label: p.school_name }));
-  el.innerHTML = buildDropdownHTML('PROGRAM', 'All Programs', items, 'programBox', 'infraProgram');
+function populateBuildingFilter(buildings) {
+  const el = document.getElementById('filterBuilding');
+  const items = buildings.map(b => ({ value: b, label: b }));
+  el.innerHTML = buildSelectDropdownHTML('BUILDING', 'All Buildings', items, 'building');
   el.addEventListener('change', (e) => {
-    if (!e.target.classList.contains('programBox')) return;
-    filters.program = Array.from(el.querySelectorAll('.programBox:checked')).map(cb => cb.value);
-    loadData();
+    if (!e.target.classList.contains('buildingRadio')) return;
+    filters.building = e.target.value;
+    document.getElementById('buildingHeaderText').textContent =
+      e.target.value === 'all' ? 'All Buildings' : e.target.value;
+    applyFilters();
   });
 }
 
-function populateYears(years) {
-  const el = document.getElementById('filterYear');
-  const items = years.map(y => ({ value: y, label: String(y) }));
-  el.innerHTML = buildDropdownHTML('YEAR', 'All Years', items, 'yearBox', 'infraYear');
+function populateFloorFilter(floors) {
+  const el = document.getElementById('filterFloor');
+  const items = floors.map(f => ({ value: f, label: f }));
+  el.innerHTML = buildSelectDropdownHTML('FLOOR', 'All Floors', items, 'floor');
   el.addEventListener('change', (e) => {
-    if (!e.target.classList.contains('yearBox')) return;
-    filters.year = Array.from(el.querySelectorAll('.yearBox:checked')).map(cb => cb.value);
-    loadData();
+    if (!e.target.classList.contains('floorRadio')) return;
+    filters.floor = e.target.value;
+    document.getElementById('floorHeaderText').textContent =
+      e.target.value === 'all' ? 'All Floors' : e.target.value;
+    applyFilters();
   });
 }
 
-function populateSections(sections) {
-  const el = document.getElementById('filterSection');
-  const items = sections.map(s => ({ value: s.class_id, label: s.class_name }));
-  el.innerHTML = buildDropdownHTML('SECTION', 'All Sections', items, 'sectionBox', 'infraSection');
+function populateClassFilter(classes) {
+  const el = document.getElementById('filterClass');
+  const items = classes.map(c => ({ value: c, label: c }));
+  el.innerHTML = buildSelectDropdownHTML('CLASS', 'All Classes', items, 'class');
   el.addEventListener('change', (e) => {
-    if (!e.target.classList.contains('sectionBox')) return;
-    filters.section = Array.from(el.querySelectorAll('.sectionBox:checked')).map(cb => cb.value);
-    loadData();
+    if (!e.target.classList.contains('classRadio')) return;
+    filters.class = e.target.value;
+    document.getElementById('classHeaderText').textContent =
+      e.target.value === 'all' ? 'All Classes' : e.target.value;
+    applyFilters();
   });
 }
 
-function populateFaculties(faculties) {
-  const el = document.getElementById('filterFaculty');
-  const items = faculties.map(f => ({
-    value: f.faculty_id,
-    label: `${f.faculty_first_name} ${f.faculty_last_name}`
-  }));
-  el.innerHTML = buildDropdownHTML('FACULTY', 'All Faculty', items, 'facultyBox', 'infraFaculty');
+function populateCategoryFilter(categories) {
+  const el = document.getElementById('filterCategory');
+  const items = categories.map(c => ({ value: c, label: c }));
+  el.innerHTML = buildSelectDropdownHTML('CATEGORY', 'All Categories', items, 'category');
   el.addEventListener('change', (e) => {
-    if (!e.target.classList.contains('facultyBox')) return;
-    filters.faculty = Array.from(el.querySelectorAll('.facultyBox:checked')).map(cb => cb.value);
-    loadData();
+    if (!e.target.classList.contains('categoryRadio')) return;
+    filters.category = e.target.value;
+    document.getElementById('categoryHeaderText').textContent =
+      e.target.value === 'all' ? 'All Categories' : e.target.value;
+    applyFilters();
   });
 }
 
-function populateRooms(rooms) {
-  const el = document.getElementById('filterRoom');
-  const items = rooms.map(r => ({
-    value: r.room_id,
-    label: `${r.room_name} (${r.floor_name} ${r.floor_building})`
-  }));
-  el.innerHTML = buildDropdownHTML('ROOM', 'All Rooms', items, 'roomBox', 'infraRoom');
-  el.addEventListener('change', (e) => {
-    if (!e.target.classList.contains('roomBox')) return;
-    filters.room = Array.from(el.querySelectorAll('.roomBox:checked')).map(cb => cb.value);
-    loadData();
-  });
-}
-
-function populateSubjects(subjects) {
-  const el = document.getElementById('filterSubject');
-  const items = subjects.map(s => ({
-    value: s.subject_id,
-    label: `${s.subject_code} ${s.subject_name}`
-  }));
-  el.innerHTML = buildDropdownHTML('SUBJECT', 'All Subjects', items, 'subjectBox', 'infraSubject');
-  el.addEventListener('change', (e) => {
-    if (!e.target.classList.contains('subjectBox')) return;
-    filters.subject = Array.from(el.querySelectorAll('.subjectBox:checked')).map(cb => cb.value);
-    loadData();
-  });
-}
-
-function populateDays(days) {
-  const el = document.getElementById('filterDay');
-  const items = days.map(d => ({ value: d, label: d }));
-  el.innerHTML = buildDropdownHTML('DAY', 'All Days', items, 'dayBox', 'infraDay');
-  el.addEventListener('change', (e) => {
-    if (!e.target.classList.contains('dayBox')) return;
-    filters.day = Array.from(el.querySelectorAll('.dayBox:checked')).map(cb => cb.value);
-    loadData();
-  });
-}
-
-function populateTimes(times) {
-  const el = document.getElementById('filterTime');
-  const items = times.map(t => ({ value: t.value, label: t.label }));
-  el.innerHTML = buildDropdownHTML('TIME', 'All Times', items, 'timeBox', 'infraTime');
-  el.addEventListener('change', (e) => {
-    if (!e.target.classList.contains('timeBox')) return;
-    filters.time = Array.from(el.querySelectorAll('.timeBox:checked')).map(cb => cb.value);
-    loadData();
-  });
-}
-
-// ─── Load room data ────────────────────────────────────────
+// ─── Load room data ─────────────────────────────────────────
 async function loadData() {
   showLoading();
   try {
-    const queryParams = new URLSearchParams();
-    queryParams.append('date', filters.date);
-
-    ['program', 'year', 'section', 'faculty', 'room', 'subject', 'day', 'time'].forEach(key => {
-      if (Array.isArray(filters[key]) && filters[key].length > 0) {
-        queryParams.append(key, filters[key].join(','));
-      }
-    });
-
-    const roomsRes = await fetch(`/infra/api/rooms?${queryParams}`);
+    const roomsRes = await fetch(`/infra/api/rooms?date=${filters.date}`);
     const roomsData = await roomsRes.json();
     if (roomsData.success) {
       allRooms = roomsData.data;
-      filteredRooms = allRooms;
-      updateStatistics();
-      renderGanttChart();
+      applyFilters();
     }
   } catch (error) {
     console.error('Error loading data:', error);
+    alert('Failed to load data. Please check your database connection.');
   } finally {
     hideLoading();
   }
 }
 
-// ─── Statistics ────────────────────────────────────────────
+// ─── Schedule-level filter helpers ──────────────────────────
+function scheduleMatchesSchool(schedule) {
+  if (filters.school === 'all') return true;
+  if (filters.school === 'default') return !schedule.school_id;
+  const schoolId = schedule.school_id ? String(schedule.school_id) : '';
+  const mergedKey = filters.school === '11' ? ['11', '13'] : [filters.school];
+  return mergedKey.includes(schoolId);
+}
+
+function scheduleMatchesClass(schedule) {
+  if (filters.class === 'all') return true;
+  return schedule.class === filters.class;
+}
+
+// ─── Apply all filters ──────────────────────────────────────
+function applyFilters() {
+  filteredRooms = [];
+
+  allRooms.forEach(room => {
+    if (filters.building !== 'all' && room.building !== filters.building) return;
+    if (filters.floor !== 'all' && room.floor !== filters.floor) return;
+
+    if (filters.category !== 'all') {
+      const roomCat = (room.room_category || 'Others').trim();
+      if (roomCat !== filters.category) return;
+    }
+
+    // Filter schedules within this room
+    const matchedSchedules = room.schedules.filter(s =>
+      scheduleMatchesSchool(s) && scheduleMatchesClass(s)
+    );
+
+    const hasMatched = matchedSchedules.length > 0;
+    if (!filters.showAvailable && !hasMatched) return;
+    if (!filters.showOccupied && hasMatched) return;
+
+    // If school or class filter active, skip rooms with no matching schedules
+    if ((filters.school !== 'all' || filters.class !== 'all') && !hasMatched) return;
+
+    filteredRooms.push({ ...room, schedules: matchedSchedules });
+  });
+
+  updateFilteredStatistics();
+  renderGanttChart();
+}
+
+// ─── Statistics ─────────────────────────────────────────────
 function timeToMinutes(timeStr) {
   if (!timeStr) return 0;
   const [h, m] = timeStr.split(':').map(Number);
@@ -374,7 +425,7 @@ function calculateOccupiedMinutes(schedules) {
   }, 0);
 }
 
-function updateStatistics() {
+function updateFilteredStatistics() {
   const totalRooms     = filteredRooms.length;
   const occupiedRooms  = filteredRooms.filter(r => r.schedules.length > 0).length;
   const availableRooms = totalRooms - occupiedRooms;
@@ -392,7 +443,7 @@ function updateStatistics() {
   document.getElementById('occupancyRate').textContent  = occupancyRate + '%';
 }
 
-// ─── School colour helpers ─────────────────────────────────
+// ─── School colour helpers ──────────────────────────────────
 function getSchoolColor(schoolId) {
   const colors = {
     7:       '#e12a7b',
@@ -418,7 +469,7 @@ function getSchoolGradient(schoolId) {
   return `linear-gradient(135deg, ${color} 0%, ${lighten(color, 15)} 100%)`;
 }
 
-// ─── Gantt Chart rendering ─────────────────────────────────
+// ─── Gantt Chart rendering ──────────────────────────────────
 function renderGanttChart() {
   const container = document.getElementById('ganttChart');
   const noData    = document.getElementById('noData');
@@ -497,7 +548,7 @@ function calculateWidth(startTime, endTime, startHour, endHour) {
   return calculatePosition(endTime, startHour, endHour) - calculatePosition(startTime, startHour, endHour);
 }
 
-// ─── CSV Export ────────────────────────────────────────────
+// ─── CSV Export ─────────────────────────────────────────────
 function exportToCSV() {
   const rows = [['Room','Category','Building','Floor','Subject','Class','Faculty','Start','End','School']];
 
@@ -541,36 +592,38 @@ function getSchoolLabel(id) {
   return schoolMap[id] || 'Unknown';
 }
 
-// ─── Clear filters ─────────────────────────────────────────
-function clearAllFilters() {
-  filters = {
-    date: new Date().toISOString().split('T')[0],
-    program: [],
-    year: [],
-    section: [],
-    faculty: [],
-    room: [],
-    subject: [],
-    day: [],
-    time: []
-  };
+// ─── Clear filters ──────────────────────────────────────────
+function clearFilters() {
+  filters.building = 'all';
+  filters.floor = 'all';
+  filters.class = 'all';
+  filters.category = 'all';
+  filters.school = 'all';
+  filters.showAvailable = true;
+  filters.showOccupied = true;
 
-  // Uncheck all checkboxes
-  document.querySelectorAll('.programBox, .yearBox, .sectionBox, .facultyBox, .roomBox, .subjectBox, .dayBox, .timeBox').forEach(cb => {
-    cb.checked = false;
+  // Reset radio buttons to "all"
+  ['building', 'floor', 'class', 'category'].forEach(prefix => {
+    const allRadio = document.querySelector(`input.${prefix}Radio[value="all"]`);
+    if (allRadio) allRadio.checked = true;
+    const headerText = document.getElementById(`${prefix}HeaderText`);
+    if (headerText) {
+      const labels = { building: 'All Buildings', floor: 'All Floors', class: 'All Classes', category: 'All Categories' };
+      headerText.textContent = labels[prefix];
+    }
   });
 
-  // Reset date radio
-  const todayStr = filters.date;
-  const dateHeaderText = document.getElementById('dateHeaderText');
-  if (dateHeaderText) dateHeaderText.textContent = todayStr;
-  const todayRadio = document.querySelector(`input.dateRadio[value="${todayStr}"]`);
-  if (todayRadio) todayRadio.checked = true;
+  document.getElementById('showAvailable').checked = true;
+  document.getElementById('showOccupied').checked = true;
 
-  loadData();
+  // Reset school chips
+  document.querySelectorAll('.school-chip').forEach(c => c.classList.remove('palette-selected'));
+  document.querySelector('.school-chip[data-school="all"]').classList.add('palette-selected');
+
+  applyFilters();
 }
 
-// ─── Loading helpers ───────────────────────────────────────
+// ─── Loading helpers ────────────────────────────────────────
 function showLoading() {
   document.getElementById('loading').style.display = 'block';
   document.getElementById('ganttChart').style.display = 'none';
@@ -581,8 +634,24 @@ function hideLoading() {
   document.getElementById('ganttChart').style.display = 'block';
 }
 
-// ─── Event listeners ───────────────────────────────────────
+// ─── Event listeners ────────────────────────────────────────
 function attachEventListeners() {
+  document.getElementById('showAvailable').addEventListener('change', e => {
+    filters.showAvailable = e.target.checked;
+    applyFilters();
+  });
+
+  document.getElementById('showOccupied').addEventListener('change', e => {
+    filters.showOccupied = e.target.checked;
+    applyFilters();
+  });
+
+  // Export CSV — sidebar nav
+  document.getElementById('exportNavBtn')?.addEventListener('click', e => {
+    e.preventDefault();
+    exportToCSV();
+  });
+
   // Clear filters button
-  document.getElementById('clearFilters')?.addEventListener('click', clearAllFilters);
+  document.getElementById('clearFiltersBtn')?.addEventListener('click', clearFilters);
 }
