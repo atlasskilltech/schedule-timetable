@@ -37,7 +37,7 @@
   <input type="hidden" id="fAY" value="">
 
   <!-- Division Cards -->
-  <div id="divCards" style="display:none;grid-template-columns:repeat(2,1fr);gap:16px"></div>
+  <div id="divCards" class="class-cards-grid" style="display:none"></div>
 
   <!-- Loading State -->
   <div id="loadingState" class="loading-state" style="display:none">
@@ -133,15 +133,23 @@ async function ldDv() {
   // Show cards
   const g = document.getElementById('divCards');
   g.style.display = 'grid';
+  var sc = document.getElementById('fSch').selectedOptions[0]?.text || '';
+  var pr = document.getElementById('fPr').selectedOptions[0]?.text || '';
+  var co = document.getElementById('fCo').selectedOptions[0]?.text || '';
   g.innerHTML = cls.map((cl, i) => {
     const col = COLORS[i % COLORS.length];
-    return '<div onclick="goSt(' + cl.st_class_id + ',\'' + encodeURIComponent(cl.st_class_name) + '\')" style="background:#fff;border:1px solid var(--border-light);border-left:4px solid ' + col + ';border-radius:8px;padding:24px;cursor:pointer;transition:all .2s;box-shadow:var(--shadow-card)" onmouseover="this.style.boxShadow=\'var(--shadow-md)\';this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.boxShadow=\'var(--shadow-card)\';this.style.transform=\'none\'">' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">' +
-        '<div style="width:40px;height:40px;border-radius:10px;background:' + col + ';display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700">' + (cl.st_class_code || 'D') + '</div>' +
-        '<span style="font-size:12px;font-weight:600;color:' + col + ';background:' + col + '15;border:1px solid ' + col + '30;padding:5px 14px;border-radius:20px">' + cl.cnt.toLocaleString() + ' students</span>' +
+    return '<div class="class-card" onclick="goSt(' + cl.st_class_id + ',\'' + encodeURIComponent(cl.st_class_name) + '\')" style="cursor:pointer">' +
+      '<div class="card-subject">' +
+        '<span class="subject-badge" style="background:' + col + '">' + (cl.st_class_code || 'D') + '</span>' +
+        '<div class="subject-name">' + cl.st_class_name + '</div>' +
       '</div>' +
-      '<div style="font-size:15px;font-weight:600;color:var(--text-primary);margin-bottom:8px;line-height:1.4">' + cl.st_class_name + '</div>' +
-      '<div style="font-size:13px;color:var(--primary-color);font-weight:500;display:flex;align-items:center;gap:4px">View students <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></div>' +
+      '<div class="card-info">' +
+        '<div class="card-info-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>' + cl.cnt.toLocaleString() + ' Students</span></div>' +
+        '<div class="card-info-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16"/><path d="M3 21h18"/></svg><span>' + sc + '</span></div>' +
+        '<div class="card-info-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg><span>' + pr + '</span></div>' +
+        '<div class="card-info-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span>' + co + '</span></div>' +
+        '<div class="card-info-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 5 7 7-7 7"/></svg><span style="color:var(--primary-color);font-weight:500">View students</span></div>' +
+      '</div>' +
     '</div>';
   }).join('');
 }
