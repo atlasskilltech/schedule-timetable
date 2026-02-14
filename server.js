@@ -47,10 +47,12 @@ app.use('/auth', authRoutes);
 const dashboardRoutes = require('./routes/dashboard');
 const timetableRoutes = require('./routes/timetable');
 const resourceRoutes = require('./routes/resources');
+const infraRoutes = require('./routes/infra');
 
 app.use('/', ensureAuthenticated, dashboardRoutes);
 app.use('/timetable', ensureAuthenticated, timetableRoutes);
 app.use('/resources', ensureAuthenticated, resourceRoutes);
+app.use('/infra', ensureAuthenticated, infraRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
